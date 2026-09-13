@@ -110,7 +110,7 @@ draw_rectangle(
 draw_text(
     90,
     430,
-    "CRAFT [SPACE]"
+    "CRAFT"
 );
 
 
