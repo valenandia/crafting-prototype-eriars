@@ -1,6 +1,12 @@
+draw_set_font(fnt_ui_small);
 /// obj_ui - Draw Event
 
 draw_set_color(c_white);
+
+
+// ---------------------------------
+// Title
+// ---------------------------------
 
 draw_text(
     40,
@@ -33,15 +39,16 @@ draw_text(
 );
 
 
-for (var i = 0; i < array_length(recipe.materials); i++) {
-    
+for (var i = 0; i < array_length(recipe.materials); i++)
+{
     var material = recipe.materials[i];
-    
+
     var material_data =
         global.materials[$ material.tag];
-    
+
+    // Цвет материала
     draw_set_color(material_data.color);
-    
+
     draw_text(
         60,
         150 + i * 25,
@@ -94,7 +101,7 @@ draw_text(
 
 
 // ---------------------------------
-// Craft button placeholder
+// Craft button
 // ---------------------------------
 
 draw_set_color(c_white);
@@ -107,6 +114,12 @@ draw_rectangle(
     false
 );
 
+
+// Текст кнопки должен быть чёрным,
+// потому что сама кнопка белая
+
+draw_set_color(c_black);
+
 draw_text(
     90,
     430,
@@ -118,6 +131,8 @@ draw_text(
 // Result
 // ---------------------------------
 
+draw_set_color(c_white);
+
 draw_text(
     40,
     500,
@@ -126,43 +141,9 @@ draw_text(
 
 
 // ---------------------------------
-// Book
+// Reset draw color
 // ---------------------------------
 
-draw_text(
-    400,
-    80,
-    "ITEM BOOK"
-);
-
-draw_text(
-    400,
-    105,
-    "Discovered: "
-    + string(discovered_count)
-);
-
-
-for (var j = 0; j < discovered_count; j++) {
-    
-    var discovered_id =
-        global.discovered_items[j];
-    
-    var discovered_name = discovered_id;
-    
-    // Находим красивое имя предмета
-    for (var k = 0; k < array_length(global.recipes); k++) {
-        
-        if (global.recipes[k].id == discovered_id) {
-            discovered_name =
-                global.recipes[k].name;
-            break;
-        }
-    }
-    
-    draw_text(
-        420,
-        140 + j * 25,
-        "✓ " + discovered_name
-    );
-}
+draw_set_color(c_white);
+draw_set_font(-1);
+draw_set_color(c_white);

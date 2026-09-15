@@ -1,61 +1,71 @@
 /// scr_materials
 
-function get_material_data() {
+function create_materials()
+{
     return {
-        stone: {
+
+        stone : {
+            id: "stone",
             name: "Stone",
-            color: make_color_rgb(120, 120, 120),
+            color: make_color_rgb(150, 150, 150),
             rarity: 35,
-            sources: "Drone / Trade"
+            source: "Drone / Trade"
         },
 
-        polyester: {
+        polyester : {
+            id: "polyester",
             name: "Polyester",
-            color: make_color_rgb(255, 120, 180),
+            color: make_color_rgb(255, 100, 180),
             rarity: 25,
-            sources: "Drone"
+            source: "Drone"
         },
 
-        tree: {
+        tree : {
+            id: "tree",
             name: "Tree",
-            color: make_color_rgb(80, 180, 80),
+            color: make_color_rgb(80, 190, 90),
             rarity: 12,
-            sources: "Drone / Trade"
+            source: "Drone / Trade"
         },
 
-        cloth: {
+        cloth : {
+            id: "cloth",
             name: "Cloth",
-            color: make_color_rgb(240, 220, 70),
+            color: make_color_rgb(240, 210, 60),
             rarity: 10,
-            sources: "Drone / Trade"
+            source: "Drone / Trade"
         },
 
-        glass: {
+        glass : {
+            id: "glass",
             name: "Glass",
-            color: make_color_rgb(80, 190, 230),
+            color: make_color_rgb(80, 210, 240),
             rarity: 9,
-            sources: "Drone / Trade"
+            source: "Drone / Trade"
         },
 
-        jewels: {
+        jewels : {
+            id: "jewels",
             name: "Jewels",
-            color: make_color_rgb(70, 100, 230),
+            color: make_color_rgb(60, 100, 255),
             rarity: 6,
-            sources: "Drone"
+            source: "Drone"
         },
 
-        mushrooms: {
+        mushrooms : {
+            id: "mushrooms",
             name: "Mushrooms",
-            color: make_color_rgb(130, 80, 50),
+            color: make_color_rgb(140, 90, 50),
             rarity: 2,
-            sources: "Quest"
+            source: "Quest"
         },
 
-        blood: {
+        blood : {
+            id: "blood",
             name: "Blood",
-            color: make_color_rgb(220, 50, 50),
+            color: make_color_rgb(220, 40, 40),
             rarity: 1,
-            sources: "Quest"
+            source: "Quest"
         }
     };
 }
