@@ -234,3 +234,89 @@ function create_recipes()
 
     ];
 }
+// =====================================================
+// FINAL FAILURE CHANCE
+//
+// TAG = количество ингредиентов в рецепте
+//
+// TAG 1 = 1 ingredient
+// TAG 2 = 2 ingredients
+// TAG 3 = 3 ingredients
+// TAG 4 = 4 ingredients
+// TAG 5 = 5 ingredients
+// =====================================================
+
+function get_final_failure_chance(_tag_count, _discovered_count)
+{
+    var failure = 1;
+
+
+    // =================================================
+    // BASE FAILURE BY TAG
+    // =================================================
+
+    switch (_tag_count)
+    {
+        case 1:
+            failure = 1;
+        break;
+
+
+        case 2:
+            failure = 5;
+        break;
+
+
+        case 3:
+            failure = 12;
+        break;
+
+
+        case 4:
+            failure = 22;
+        break;
+
+
+        case 5:
+            failure = 35;
+        break;
+
+
+        default:
+            failure = 35;
+        break;
+    }
+
+
+    // =================================================
+    // DISCOVERY BONUS
+    //
+    // Каждые 4 открытых предмета:
+    // -1% failure
+    // =================================================
+
+    var discovery_bonus =
+        floor(_discovered_count / 4);
+
+
+    failure -=
+        discovery_bonus;
+
+
+    // =================================================
+    // MINIMUM FAILURE
+    // =================================================
+
+    failure =
+        max(
+            1,
+            failure
+        );
+
+
+    // =================================================
+    // RESULT
+    // =================================================
+
+    return failure;
+}

@@ -36,6 +36,7 @@
     {"id":{"name":"scr_book","path":"scripts/scr_book/scr_book.yy",},},
     {"id":{"name":"scr_crafting","path":"scripts/scr_crafting/scr_crafting.yy",},},
     {"id":{"name":"scr_economy","path":"scripts/scr_economy/scr_economy.yy",},},
+    {"id":{"name":"scr_events","path":"scripts/scr_events/scr_events.yy",},},
     {"id":{"name":"scr_market","path":"scripts/scr_market/scr_market.yy",},},
     {"id":{"name":"scr_materials","path":"scripts/scr_materials/scr_materials.yy",},},
     {"id":{"name":"scr_recipes","path":"scripts/scr_recipes/scr_recipes.yy",},},

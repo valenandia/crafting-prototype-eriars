@@ -1,8 +1,25 @@
-
 /// obj_ui - Step Event
 
-var mx = device_mouse_x_to_gui(0);
-var my = device_mouse_y_to_gui(0);
+
+// =====================================================
+// GUI MOUSE POSITION
+// =====================================================
+
+var mx =
+    device_mouse_x_to_gui(0);
+
+var my =
+    device_mouse_y_to_gui(0);
+
+
+// =====================================================
+// CURRENT RECIPE
+// =====================================================
+
+var recipe =
+    global.recipes[
+        global.selected_recipe
+    ];
 
 
 // =====================================================
@@ -14,63 +31,79 @@ if (mouse_check_button_pressed(mb_left))
     if (
         mx >= 40 &&
         mx <= 220 &&
-        my >= 410 &&
-        my <= 465
+        my >= 445 &&
+        my <= 500
     )
     {
-        var recipe =
-            global.recipes[global.selected_recipe];
+        // =============================================
+        // CRAFT
+        // =============================================
+
+        var discovered_count =
+            array_length(
+                global.discovered_items
+            );
+
 
         var result =
             craft_item(
                 recipe,
-                array_length(global.discovered_items)
+                discovered_count
             );
 
 
-        // =================================================
+        // =============================================
         // NOT ENOUGH MATERIALS
-        // =================================================
+        // =============================================
 
         if (!result.can_craft)
         {
             global.craft_result =
                 "NOT ENOUGH MATERIALS";
 
+
             add_craft_log(
-                "NO MATERIALS  "
-                + result.item_name
+                recipe.name
+                + " - NO MATERIALS"
             );
         }
 
 
-        // =================================================
-        // SUCCESS
-        // =================================================
+        // =============================================
+        // CRAFT SUCCESS
+        // =============================================
 
         else if (result.success)
         {
-            // ---------------------------------------------
-            // ADD CRAFTED ITEM TO INVENTORY
-            // ---------------------------------------------
+            var item_key =
+                recipe.id;
 
-            var item_key = result.item_id;
 
-            var current_amount = 0;
+            // -----------------------------------------
+            // INVENTORY
+            // -----------------------------------------
 
             if (
-                variable_struct_exists(
+                !variable_struct_exists(
                     global.item_inventory,
                     item_key
                 )
             )
             {
-                current_amount =
-                    variable_struct_get(
-                        global.item_inventory,
-                        item_key
-                    );
+                variable_struct_set(
+                    global.item_inventory,
+                    item_key,
+                    0
+                );
             }
+
+
+            var current_amount =
+                variable_struct_get(
+                    global.item_inventory,
+                    item_key
+                );
+
 
             variable_struct_set(
                 global.item_inventory,
@@ -79,85 +112,143 @@ if (mouse_check_button_pressed(mb_left))
             );
 
 
-            // ---------------------------------------------
-            // CHECK DISCOVERY
-            // ---------------------------------------------
+            // -----------------------------------------
+            // DISCOVERY CHECK
+            // -----------------------------------------
 
-            var already_discovered = false;
+            var already_discovered =
+                false;
+
 
             for (
                 var i = 0;
-                i < array_length(global.discovered_items);
+                i < array_length(
+                    global.discovered_items
+                );
                 i++
             )
             {
                 if (
                     global.discovered_items[i]
-                    == result.item_id
+                    == recipe.id
                 )
                 {
-                    already_discovered = true;
+                    already_discovered =
+                        true;
+
                     break;
                 }
             }
 
 
-            // ---------------------------------------------
+            // -----------------------------------------
             // NEW DISCOVERY
-            // ---------------------------------------------
+            // -----------------------------------------
 
             if (!already_discovered)
             {
                 array_push(
                     global.discovered_items,
-                    result.item_id
+                    recipe.id
                 );
+
 
                 global.craft_result =
-                    "SUCCESS! "
-                    + result.item_name
-                    + " - NEW DISCOVERY!";
-
-                add_craft_log(
-                    "SUCCESS  "
-                    + result.item_name
-                    + "  [NEW]"
-                );
+                    "SUCCESS! DISCOVERED "
+                    + recipe.name;
             }
-
-
-            // ---------------------------------------------
-            // ALREADY DISCOVERED
-            // ---------------------------------------------
-
             else
             {
                 global.craft_result =
                     "SUCCESS! "
-                    + result.item_name;
-
-                add_craft_log(
-                    "SUCCESS  "
-                    + result.item_name
-                );
+                    + recipe.name;
             }
+
+
+            // -----------------------------------------
+            // LOG
+            // -----------------------------------------
+
+            add_craft_log(
+                "SUCCESS "
+                + recipe.name
+                + " | "
+                + string(
+                    result.failure_chance
+                )
+                + "% fail"
+            );
         }
 
 
-        // =================================================
-        // FAILED
-        // =================================================
+        // =============================================
+        // CRAFT FAILURE
+        // =============================================
 
         else
         {
             global.craft_result =
-                "FAILED! "
-                + result.item_name;
+                "CRAFT FAILED!";
+
 
             add_craft_log(
-                "FAILED  "
-                + result.item_name
+                "FAILED "
+                + recipe.name
+                + " | "
+                + string(
+                    result.failure_chance
+                )
+                + "% fail"
             );
         }
+    }
+}
+
+
+// =====================================================
+// CHANGE RECIPE
+//
+// LEFT / RIGHT
+// =====================================================
+
+if (
+    keyboard_check_pressed(
+        vk_left
+    )
+)
+{
+    global.selected_recipe--;
+
+
+    if (
+        global.selected_recipe < 0
+    )
+    {
+        global.selected_recipe =
+            array_length(
+                global.recipes
+            ) - 1;
+    }
+}
+
+
+if (
+    keyboard_check_pressed(
+        vk_right
+    )
+)
+{
+    global.selected_recipe++;
+
+
+    if (
+        global.selected_recipe
+        >= array_length(
+            global.recipes
+        )
+    )
+    {
+        global.selected_recipe =
+            0;
     }
 }

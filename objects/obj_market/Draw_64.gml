@@ -187,3 +187,60 @@ draw_text(
 
 draw_set_font(-1);
 draw_set_color(c_white);
+
+// =====================================================
+// MARKET EVENT
+// =====================================================
+
+if (global.market_event_active)
+{
+    var event_seconds =
+        ceil(
+            global.market_event_timer
+            / room_speed
+        );
+
+
+    draw_set_color(c_red);
+
+    draw_text(
+        market_x,
+        market_y + 305,
+        "EVENT: "
+        + global.market_event_name
+    );
+
+
+    draw_set_color(c_yellow);
+
+    draw_text(
+        market_x,
+        market_y + 325,
+        "FAILURE: +"
+        + string(
+            global.market_event_failure_bonus
+        )
+        + "%"
+    );
+
+
+    draw_set_color(c_gray);
+
+    draw_text(
+        market_x,
+        market_y + 345,
+        "ENDS: "
+        + string(event_seconds)
+        + "s"
+    );
+}
+else
+{
+    draw_set_color(c_gray);
+
+    draw_text(
+        market_x,
+        market_y + 305,
+        "EVENT: NONE"
+    );
+}

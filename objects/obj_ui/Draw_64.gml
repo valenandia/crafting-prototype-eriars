@@ -1,12 +1,22 @@
-draw_set_font(fnt_ui_small);
-/// obj_ui - Draw Event
-
-draw_set_color(c_white);
+/// obj_ui - Draw GUI Event
 
 
-// ---------------------------------
-// Title
-// ---------------------------------
+// =====================================================
+// SETUP
+// =====================================================
+
+draw_set_font(
+    fnt_ui_small
+);
+
+draw_set_color(
+    c_white
+);
+
+
+// =====================================================
+// TITLE
+// =====================================================
 
 draw_text(
     40,
@@ -15,22 +25,37 @@ draw_text(
 );
 
 
-// ---------------------------------
-// Current recipe
-// ---------------------------------
+// =====================================================
+// CURRENT RECIPE
+// =====================================================
 
-var recipe = global.recipes[global.selected_recipe];
+var recipe =
+    global.recipes[
+        global.selected_recipe
+    ];
+
+
+draw_set_color(
+    c_white
+);
+
 
 draw_text(
     40,
     80,
-    "ITEM: " + recipe.name
+    "ITEM: "
+    + recipe.name
 );
 
 
-// ---------------------------------
-// Materials
-// ---------------------------------
+// =====================================================
+// MATERIALS TITLE
+// =====================================================
+
+draw_set_color(
+    c_white
+);
+
 
 draw_text(
     40,
@@ -39,111 +64,275 @@ draw_text(
 );
 
 
-for (var i = 0; i < array_length(recipe.materials); i++)
+// =====================================================
+// MATERIAL LIST
+// =====================================================
+
+for (
+    var i = 0;
+    i < array_length(recipe.materials);
+    i++
+)
 {
-    var material = recipe.materials[i];
+    var material =
+        recipe.materials[i];
 
-    var material_data =
-        global.materials[$ material.tag];
 
-    // Цвет материала
-    draw_set_color(material_data.color);
+var material_data =
+    global.materials[$ material.tag];
+
+
+    // Цвет конкретного материала
+    draw_set_color(
+        material_data.color
+    );
+
 
     draw_text(
         60,
         150 + i * 25,
+
         material_data.name
         + "  "
-        + string(material.percentage)
+        + string(
+            material.percentage
+        )
         + "%"
     );
 }
 
 
-// ---------------------------------
-// Craft chance
-// ---------------------------------
+// =====================================================
+// TAG
+//
+// TAG = количество ингредиентов
+// =====================================================
 
-var tag_count = array_length(recipe.materials);
+var tag_count =
+    array_length(
+        recipe.materials
+    );
+
+
+// =====================================================
+// DISCOVERED COUNT
+// =====================================================
 
 var discovered_count =
-    array_length(global.discovered_items);
+    array_length(
+        global.discovered_items
+    );
 
-var failure_chance =
+
+// =====================================================
+// BASE FAILURE
+// =====================================================
+
+var base_failure =
     get_final_failure_chance(
         tag_count,
         discovered_count
     );
 
 
-draw_set_color(c_white);
+// =====================================================
+// EVENT FAILURE
+// =====================================================
+
+var event_failure =
+    market_event_get_failure_bonus();
+
+
+// =====================================================
+// FINAL FAILURE
+// =====================================================
+
+var failure_chance =
+    base_failure
+    + event_failure;
+
+
+failure_chance =
+    clamp(
+        failure_chance,
+        0,
+        95
+    );
+
+
+// =====================================================
+// TAG INFO
+// =====================================================
+
+draw_set_color(
+    c_white
+);
+
+
+draw_text(
+    40,
+    285,
+    "TAG: "
+    + string(tag_count)
+);
+
+
+// =====================================================
+// INGREDIENT COUNT
+// =====================================================
+
+draw_set_color(
+    c_gray
+);
+
 
 draw_text(
     40,
     310,
-    "TAGS: " + string(tag_count)
+    "INGREDIENTS: "
+    + string(tag_count)
 );
+
+
+// =====================================================
+// BASE FAILURE
+// =====================================================
+
+draw_set_color(
+    c_white
+);
+
 
 draw_text(
     40,
     335,
-    "FAILURE CHANCE: "
-    + string(failure_chance)
+    "BASE FAILURE: "
+    + string(base_failure)
     + "%"
 );
+
+
+// =====================================================
+// FINAL FAILURE
+// =====================================================
+
+if (event_failure > 0)
+{
+    draw_set_color(
+        c_red
+    );
+}
+else
+{
+    draw_set_color(
+        c_white
+    );
+}
+
 
 draw_text(
     40,
     360,
+    "FINAL FAILURE: "
+    + string(failure_chance)
+    + "%"
+);
+
+
+// =====================================================
+// ACTIVE EVENT
+// =====================================================
+
+if (event_failure > 0)
+{
+    draw_set_color(
+        c_yellow
+    );
+
+
+    draw_text(
+        40,
+        385,
+
+        global.market_event_name
+        + ": +"
+        + string(event_failure)
+        + "%"
+    );
+}
+
+
+// =====================================================
+// DISCOVERED
+// =====================================================
+
+draw_set_color(
+    c_white
+);
+
+
+draw_text(
+    40,
+    410,
     "DISCOVERED: "
     + string(discovered_count)
 );
 
 
-// ---------------------------------
-// Craft button
-// ---------------------------------
+// =====================================================
+// CRAFT BUTTON
+// =====================================================
 
-draw_set_color(c_white);
+draw_set_color(
+    c_white
+);
+
 
 draw_rectangle(
     40,
-    410,
+    445,
     220,
-    465,
+    500,
     false
 );
 
 
-// Текст кнопки должен быть чёрным,
-// потому что сама кнопка белая
+// =====================================================
+// CRAFT BUTTON TEXT
+// =====================================================
 
-draw_set_color(c_black);
+draw_set_color(
+    c_black
+);
+
 
 draw_text(
     90,
-    430,
+    465,
     "CRAFT"
 );
 
 
-// ---------------------------------
-// Result
-// ---------------------------------
+// =====================================================
+// CRAFT RESULT
+// =====================================================
 
-draw_set_color(c_white);
+draw_set_color(
+    c_white
+);
+
 
 draw_text(
     40,
-    500,
+    520,
     global.craft_result
 );
 
 
-// ---------------------------------
-// Reset draw color
-// ---------------------------------
+// =====================================================
+// RESET
+// =====================================================
 
-draw_set_color(c_white);
 draw_set_font(-1);
 draw_set_color(c_white);
+draw_set_alpha(1);

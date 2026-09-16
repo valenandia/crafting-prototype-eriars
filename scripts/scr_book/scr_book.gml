@@ -30,12 +30,3 @@ function get_knowledge_bonus(_discovered_count) {
     
     return _discovered_count * 2;
 }
-
-
-function get_final_failure_chance(_tag_count, _discovered_count) {
-    
-    var base_chance = get_failure_chance_by_tags(_tag_count);
-    var knowledge_bonus = get_knowledge_bonus(_discovered_count);
-    
-    return max(0, base_chance - knowledge_bonus);
-}

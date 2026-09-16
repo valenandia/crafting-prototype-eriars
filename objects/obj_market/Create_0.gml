@@ -64,3 +64,17 @@ market_timer =
 // =====================================================
 
 market_generate_prices();
+// =====================================================
+// MARKET EVENTS
+// =====================================================
+
+global.market_event_active = false;
+
+global.market_event_name =
+    "NO EVENT";
+
+global.market_event_failure_bonus =
+    0;
+
+global.market_event_timer =
+    0;
