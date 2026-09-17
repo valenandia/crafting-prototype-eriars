@@ -237,23 +237,24 @@ function create_recipes()
 // =====================================================
 // FINAL FAILURE CHANCE
 //
-// TAG = количество ингредиентов в рецепте
+// TAG = количество ингредиентов
 //
-// TAG 1 = 1 ingredient
-// TAG 2 = 2 ingredients
-// TAG 3 = 3 ingredients
-// TAG 4 = 4 ingredients
-// TAG 5 = 5 ingredients
+// 1 ingredient = 1%
+// 2 ingredients = 10%
+// 3 ingredients = 20%
+// 4 ingredients = 30%
+// 5 ingredients = 40%
+//
+// Каждый изученный предмет = -2%
 // =====================================================
 
 function get_final_failure_chance(_tag_count, _discovered_count)
 {
+    // ---------------------------------------------
+    // BASE FAILURE
+    // ---------------------------------------------
+
     var failure = 1;
-
-
-    // =================================================
-    // BASE FAILURE BY TAG
-    // =================================================
 
     switch (_tag_count)
     {
@@ -261,62 +262,50 @@ function get_final_failure_chance(_tag_count, _discovered_count)
             failure = 1;
         break;
 
-
         case 2:
-            failure = 5;
+            failure = 10;
         break;
-
 
         case 3:
-            failure = 12;
+            failure = 20;
         break;
-
 
         case 4:
-            failure = 22;
+            failure = 30;
         break;
-
 
         case 5:
-            failure = 35;
+            failure = 40;
         break;
 
-
         default:
-            failure = 35;
+            failure = 40;
         break;
     }
 
 
-    // =================================================
-    // DISCOVERY BONUS
+    // ---------------------------------------------
+    // KNOWLEDGE BONUS
     //
-    // Каждые 4 открытых предмета:
-    // -1% failure
-    // =================================================
+    // Каждый открытый предмет = -2%
+    // ---------------------------------------------
 
-    var discovery_bonus =
-        floor(_discovered_count / 4);
+    var knowledge_bonus =
+        _discovered_count * 2;
 
-
-    failure -=
-        discovery_bonus;
+    failure -= knowledge_bonus;
 
 
-    // =================================================
-    // MINIMUM FAILURE
-    // =================================================
+    // ---------------------------------------------
+    // LIMIT
+    // ---------------------------------------------
 
     failure =
         max(
-            1,
+            0,
             failure
         );
 
-
-    // =================================================
-    // RESULT
-    // =================================================
 
     return failure;
 }

@@ -1,21 +1,3 @@
-draw_set_font(fnt_ui_small);
-/// obj_market - Draw GUI Event
-
-var mx = market_x;
-var my = market_y;
-
-
-// =====================================================
-// TITLE
-// =====================================================
-
-draw_set_color(c_white);
-
-draw_text(
-    mx,
-    my,
-    "WORLD MARKET"
-);
 /// obj_market - Draw GUI Event
 
 draw_set_font(fnt_ui_small);
@@ -37,9 +19,11 @@ draw_text(
 );
 
 
-// Timer
+// =====================================================
+// UPDATE TIMER
+// =====================================================
 
-var seconds_left =
+var update_seconds =
     ceil(market_timer / room_speed);
 
 draw_set_color(c_gray);
@@ -48,7 +32,7 @@ draw_text(
     mx + 160,
     my,
     "UPDATE: "
-    + string(seconds_left)
+    + string(update_seconds)
     + "s"
 );
 
@@ -69,29 +53,35 @@ draw_text(mx + 220, my + 30, "S");
 // MATERIALS
 // =====================================================
 
-for (
-    var i = 0;
-    i < array_length(global.market_materials);
-    i++
-)
+for (var i = 0; i < array_length(global.market_materials); i++)
 {
+    // -------------------------------------------------
+    // CURRENT MATERIAL
+    // -------------------------------------------------
+
     var tag =
         global.market_materials[i];
+
+    var material_data =
+        global.materials[$ tag];
 
     var yy =
         my + 55 + (i * 27);
 
 
     // -------------------------------------------------
-    // RESOURCE
+    // RESOURCE NAME
+    // Цвет берём из Material Pool
     // -------------------------------------------------
 
-    draw_set_color(c_white);
+    draw_set_color(
+        material_data.color
+    );
 
     draw_text(
         mx,
         yy,
-        tag
+        material_data.name
     );
 
 
@@ -106,11 +96,17 @@ for (
         );
 
     if (fantasy >= 1.25)
+    {
         draw_set_color(c_lime);
+    }
     else if (fantasy <= 0.80)
+    {
         draw_set_color(c_red);
+    }
     else
+    {
         draw_set_color(c_white);
+    }
 
     draw_text(
         mx + 110,
@@ -130,11 +126,17 @@ for (
         );
 
     if (cyber >= 1.25)
+    {
         draw_set_color(c_lime);
+    }
     else if (cyber <= 0.80)
+    {
         draw_set_color(c_red);
+    }
     else
+    {
         draw_set_color(c_white);
+    }
 
     draw_text(
         mx + 165,
@@ -154,11 +156,17 @@ for (
         );
 
     if (steam >= 1.25)
+    {
         draw_set_color(c_lime);
+    }
     else if (steam <= 0.80)
+    {
         draw_set_color(c_red);
+    }
     else
+    {
         draw_set_color(c_white);
+    }
 
     draw_text(
         mx + 220,
@@ -182,13 +190,6 @@ draw_text(
 
 
 // =====================================================
-// RESET
-// =====================================================
-
-draw_set_font(-1);
-draw_set_color(c_white);
-
-// =====================================================
 // MARKET EVENT
 // =====================================================
 
@@ -201,21 +202,23 @@ if (global.market_event_active)
         );
 
 
+    // EVENT NAME
     draw_set_color(c_red);
 
     draw_text(
-        market_x,
-        market_y + 305,
+        mx,
+        my + 305,
         "EVENT: "
         + global.market_event_name
     );
 
 
+    // FAILURE BONUS
     draw_set_color(c_yellow);
 
     draw_text(
-        market_x,
-        market_y + 325,
+        mx,
+        my + 325,
         "FAILURE: +"
         + string(
             global.market_event_failure_bonus
@@ -224,11 +227,12 @@ if (global.market_event_active)
     );
 
 
+    // EVENT TIMER
     draw_set_color(c_gray);
 
     draw_text(
-        market_x,
-        market_y + 345,
+        mx,
+        my + 345,
         "ENDS: "
         + string(event_seconds)
         + "s"
@@ -239,8 +243,17 @@ else
     draw_set_color(c_gray);
 
     draw_text(
-        market_x,
-        market_y + 305,
+        mx,
+        my + 305,
         "EVENT: NONE"
     );
 }
+
+
+// =====================================================
+// RESET
+// =====================================================
+
+draw_set_font(-1);
+draw_set_color(c_white);
+draw_set_alpha(1);
