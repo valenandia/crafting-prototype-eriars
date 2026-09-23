@@ -2,8 +2,8 @@
 
 draw_set_font(fnt_ui_small);
 
-var panel_x = drone_x;
-var panel_y = drone_y;
+var dx = drone_x;
+var dy = drone_y;
 
 
 // =====================================================
@@ -13,24 +13,36 @@ var panel_y = drone_y;
 draw_set_color(c_white);
 
 draw_text(
-    panel_x,
-    panel_y,
-    "DRONE"
+    dx,
+    dy,
+    "DRONES"
 );
 
 
 // =====================================================
-// STATUS
+// DRONE A
 // =====================================================
 
-if (drone_active)
+draw_set_color(c_white);
+
+draw_text(
+    dx,
+    dy + 30,
+    "DRONE A"
+);
+
+
+if (drone_a_active)
 {
+    var seconds_a =
+        ceil(drone_a_time / room_speed);
+
     draw_set_color(c_yellow);
 
     draw_text(
-        panel_x,
-        panel_y + 30,
-        "STATUS: SEARCHING"
+        dx + 70,
+        dy + 30,
+        string(seconds_a) + "s"
     );
 }
 else
@@ -38,82 +50,311 @@ else
     draw_set_color(c_lime);
 
     draw_text(
-        panel_x,
-        panel_y + 30,
-        "STATUS: READY"
+        dx + 70,
+        dy + 30,
+        "READY"
     );
 }
 
 
-// =====================================================
-// TIMER
-// =====================================================
+// BUTTON
 
-if (drone_active)
+if (drone_a_active)
 {
-    var seconds_left =
-        ceil(drone_time / room_speed);
-
+    draw_set_color(c_gray);
+}
+else
+{
     draw_set_color(c_white);
+}
+
+
+draw_rectangle(
+    drone_a_button_x1,
+    drone_a_button_y1,
+    drone_a_button_x2,
+    drone_a_button_y2,
+    false
+);
+
+
+if (drone_a_active)
+{
+    draw_set_color(c_dkgray);
+}
+else
+{
+    draw_set_color(c_black);
+}
+
+
+draw_text(
+    drone_a_button_x1 + 55,
+    drone_a_button_y1 + 8,
+    "SEND"
+);
+
+
+draw_set_color(c_gray);
+
+draw_text(
+    dx,
+    dy + 105,
+    drone_a_result
+);
+
+
+// =====================================================
+// DRONE B
+// =====================================================
+
+draw_set_color(c_white);
+
+draw_text(
+    dx,
+    dy + 135,
+    "DRONE B"
+);
+
+
+if (drone_b_active)
+{
+    var seconds_b =
+        ceil(drone_b_time / room_speed);
+
+    draw_set_color(c_yellow);
 
     draw_text(
-        panel_x,
-        panel_y + 50,
-        "RETURN: "
-        + string(seconds_left)
+        dx + 70,
+        dy + 135,
+        string(seconds_b) + "s"
+    );
+}
+else
+{
+    draw_set_color(c_lime);
+
+    draw_text(
+        dx + 70,
+        dy + 135,
+        "READY"
+    );
+}
+
+
+// BUTTON
+
+if (drone_b_active)
+{
+    draw_set_color(c_gray);
+}
+else
+{
+    draw_set_color(c_white);
+}
+
+
+draw_rectangle(
+    drone_b_button_x1,
+    drone_b_button_y1,
+    drone_b_button_x2,
+    drone_b_button_y2,
+    false
+);
+
+
+if (drone_b_active)
+{
+    draw_set_color(c_dkgray);
+}
+else
+{
+    draw_set_color(c_black);
+}
+
+
+draw_text(
+    drone_b_button_x1 + 55,
+    drone_b_button_y1 + 8,
+    "SEND"
+);
+
+
+draw_set_color(c_gray);
+
+draw_text(
+    dx,
+    dy + 210,
+    drone_b_result
+);
+
+
+// =====================================================
+// SCOUT
+// =====================================================
+
+draw_set_color(c_aqua);
+
+draw_text(
+    dx,
+    dy + 240,
+    "SCOUT [LOW]"
+);
+
+
+// -----------------------------------------
+// Current lowest resource preview
+// -----------------------------------------
+
+if (!scout_active)
+{
+    var preview_tag = "stone";
+    var preview_amount =
+        global.material_pool[$ "stone"];
+
+
+    if (
+        global.material_pool[$ "polyester"]
+        < preview_amount
+    )
+    {
+        preview_tag = "polyester";
+        preview_amount =
+            global.material_pool[$ "polyester"];
+    }
+
+
+    if (
+        global.material_pool[$ "tree"]
+        < preview_amount
+    )
+    {
+        preview_tag = "tree";
+        preview_amount =
+            global.material_pool[$ "tree"];
+    }
+
+
+    if (
+        global.material_pool[$ "cloth"]
+        < preview_amount
+    )
+    {
+        preview_tag = "cloth";
+        preview_amount =
+            global.material_pool[$ "cloth"];
+    }
+
+
+    if (
+        global.material_pool[$ "glass"]
+        < preview_amount
+    )
+    {
+        preview_tag = "glass";
+        preview_amount =
+            global.material_pool[$ "glass"];
+    }
+
+
+    if (
+        global.material_pool[$ "jewels"]
+        < preview_amount
+    )
+    {
+        preview_tag = "jewels";
+        preview_amount =
+            global.material_pool[$ "jewels"];
+    }
+
+
+    var preview_name =
+        trade_get_resource_name(
+            preview_tag
+        );
+
+
+    draw_set_color(c_yellow);
+
+    draw_text(
+        dx,
+        dy + 265,
+        "LOW: "
+        + preview_name
+        + " ("
+        + string(preview_amount)
+        + ")"
+    );
+}
+else
+{
+    var scout_seconds =
+        ceil(scout_time / room_speed);
+
+
+    draw_set_color(c_yellow);
+
+    draw_text(
+        dx,
+        dy + 265,
+        scout_target_name
+        + " / "
+        + string(scout_seconds)
         + "s"
     );
 }
 
 
 // =====================================================
-// BUTTON
+// SCOUT BUTTON
 // =====================================================
 
-if (!drone_active)
-{
-    draw_set_color(c_white);
-}
-else
+if (scout_active)
 {
     draw_set_color(c_gray);
 }
+else
+{
+    draw_set_color(c_white);
+}
+
 
 draw_rectangle(
-    drone_button_x1,
-    drone_button_y1,
-    drone_button_x2,
-    drone_button_y2,
+    scout_button_x1,
+    scout_button_y1,
+    scout_button_x2,
+    scout_button_y2,
     false
 );
 
 
-if (!drone_active)
-{
-    draw_set_color(c_black);
-}
-else
+if (scout_active)
 {
     draw_set_color(c_dkgray);
 }
+else
+{
+    draw_set_color(c_black);
+}
+
 
 draw_text(
-    drone_button_x1 + 48,
-    drone_button_y1 + 11,
-    "SEND DRONE"
+    scout_button_x1 + 48,
+    scout_button_y1 + 8,
+    "FIND LOW"
 );
 
 
 // =====================================================
-// RESULT
+// SCOUT RESULT
 // =====================================================
 
 draw_set_color(c_gray);
 
 draw_text(
-    panel_x,
-    panel_y + 130,
-    drone_result
+    dx,
+    dy + 325,
+    scout_result
 );
 
 

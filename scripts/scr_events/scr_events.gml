@@ -7,8 +7,8 @@
 
 function market_event_try_start()
 {
-    // Если уже идёт событие,
-    // новое событие не запускаем
+    // Если событие уже активно —
+    // новое не запускаем
     if (global.market_event_active)
     {
         return;
@@ -18,8 +18,8 @@ function market_event_try_start()
     // =================================================
     // EVENT CHANCE
     //
-    // На каждом обновлении рынка:
-    // 45% шанс события
+    // Каждые 30 секунд при обновлении рынка
+    // 45% шанс получить событие
     // =================================================
 
     var event_roll =
@@ -44,108 +44,16 @@ function market_event_try_start()
 
 
     // =================================================
-    // SELECT EVENT
-    // =================================================
-
-    var roll =
-        random(100);
-
-
-    // =================================================
-    // 1. SUPPLY DELAYS
+    // START RANDOM EVENT
     //
-    // Частый
-    // Очень долгий
-    // Слабый
+    // Выбор конкретного события теперь находится
+    // в market_event_start_random()
     //
-    // +3%
-    // 120 seconds
+    // 0-3 = negative
+    // 4-7 = positive
     // =================================================
 
-    if (roll < 40)
-    {
-        global.market_event_name =
-            "SUPPLY DELAYS";
-
-        global.market_event_failure_bonus =
-            3;
-
-        global.market_event_timer =
-            120 * room_speed;
-    }
-
-
-    // =================================================
-    // 2. MATERIAL SHORTAGE
-    //
-    // Средний
-    //
-    // +7%
-    // 60 seconds
-    // =================================================
-
-    else if (roll < 70)
-    {
-        global.market_event_name =
-            "MATERIAL SHORTAGE";
-
-        global.market_event_failure_bonus =
-            7;
-
-        global.market_event_timer =
-            60 * room_speed;
-    }
-
-
-    // =================================================
-    // 3. MARKET PANIC
-    //
-    // Короткий
-    // Сильный
-    //
-    // +15%
-    // 30 seconds
-    // =================================================
-
-    else if (roll < 90)
-    {
-        global.market_event_name =
-            "MARKET PANIC";
-
-        global.market_event_failure_bonus =
-            15;
-
-        global.market_event_timer =
-            30 * room_speed;
-    }
-
-
-    // =================================================
-    // 4. WORLD DISRUPTION
-    //
-    // Очень редкий
-    // Очень короткий
-    // Очень мощный
-    //
-    // +35%
-    // 10 seconds
-    // =================================================
-
-    else
-    {
-        global.market_event_name =
-            "WORLD DISRUPTION";
-
-        global.market_event_failure_bonus =
-            35;
-
-        global.market_event_timer =
-            10 * room_speed;
-    }
-
-
-    global.market_event_active =
-        true;
+    market_event_start_random();
 }
 
 

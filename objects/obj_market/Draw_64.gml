@@ -201,33 +201,70 @@ if (global.market_event_active)
             / room_speed
         );
 
-
-    // EVENT NAME
-    draw_set_color(c_red);
-
-    draw_text(
-        mx,
-        my + 305,
-        "EVENT: "
-        + global.market_event_name
-    );
+    var event_bonus =
+        global.market_event_failure_bonus;
 
 
-    // FAILURE BONUS
-    draw_set_color(c_yellow);
+    // =================================================
+    // NEGATIVE EVENT
+    // =================================================
 
-    draw_text(
-        mx,
-        my + 325,
-        "FAILURE: +"
-        + string(
-            global.market_event_failure_bonus
-        )
-        + "%"
-    );
+    if (event_bonus > 0)
+    {
+        draw_set_color(c_red);
+
+        draw_text(
+            mx,
+            my + 305,
+            "EVENT: "
+            + global.market_event_name
+        );
 
 
-    // EVENT TIMER
+        draw_set_color(c_yellow);
+
+        draw_text(
+            mx,
+            my + 325,
+            "FAILURE: +"
+            + string(event_bonus)
+            + "%"
+        );
+    }
+
+
+    // =================================================
+    // POSITIVE EVENT
+    // =================================================
+
+    else if (event_bonus < 0)
+    {
+        draw_set_color(c_lime);
+
+        draw_text(
+            mx,
+            my + 305,
+            "EVENT: "
+            + global.market_event_name
+        );
+
+
+        draw_set_color(c_lime);
+
+        draw_text(
+            mx,
+            my + 325,
+            "FAILURE: "
+            + string(event_bonus)
+            + "%"
+        );
+    }
+
+
+    // =================================================
+    // TIMER
+    // =================================================
+
     draw_set_color(c_gray);
 
     draw_text(
@@ -248,7 +285,6 @@ else
         "EVENT: NONE"
     );
 }
-
 
 // =====================================================
 // RESET

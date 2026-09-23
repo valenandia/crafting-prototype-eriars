@@ -146,3 +146,92 @@ function trade_get_buy_price(_tag)
         round(base_price * mult)
     );
 }
+// =====================================================
+// BEST SELL WORLD
+//
+// Ищет мир с самым высоким multiplier
+// =====================================================
+
+function trade_get_best_sell_world(_tag)
+{
+    var best_world =
+        global.market_worlds[0];
+
+    var best_multiplier =
+        market_get_multiplier(
+            best_world,
+            _tag
+        );
+
+
+    for (
+        var i = 1;
+        i < array_length(global.market_worlds);
+        i++
+    )
+    {
+        var world =
+            global.market_worlds[i];
+
+        var multiplier =
+            market_get_multiplier(
+                world,
+                _tag
+            );
+
+
+        if (multiplier > best_multiplier)
+        {
+            best_multiplier =
+                multiplier;
+
+            best_world =
+                world;
+        }
+    }
+
+
+    return best_world;
+}
+
+
+// =====================================================
+// SELL PRICE
+//
+// Цена продажи 100 units в самом дорогом мире
+// =====================================================
+
+function trade_get_sell_price(_tag)
+{
+    // Самый выгодный мир для продажи
+    var world =
+        trade_get_best_sell_world(_tag);
+
+
+    // Та же базовая стоимость ресурса,
+    // которая используется системой Trade
+    var base_price =
+        trade_get_base_price(_tag);
+
+
+    // Рыночный multiplier этого мира
+    var multiplier =
+        market_get_multiplier(
+            world,
+            _tag
+        );
+
+
+    // Финальная цена продажи 100 units
+    var price =
+        round(
+            base_price
+            * multiplier
+        );
+
+
+    return max(
+        1,
+        price
+    );
+}
