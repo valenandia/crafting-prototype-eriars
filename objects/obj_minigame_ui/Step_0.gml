@@ -1,215 +1,352 @@
-/// obj_minigame_ui - Step
+/// obj_minigame_ui - Step Event
 
-// Мини-игра принимает управление только на CRAFTING screen.
-if (global.ui_screen != 1) exit;
 
-var mx = device_mouse_x_to_gui(0);
-var my = device_mouse_y_to_gui(0);
+// =====================================================
+// ONLY CRAFT SCREEN
+// =====================================================
+
+if (global.ui_screen != 1)
+{
+    exit;
+}
+
+
+// =====================================================
+// MOUSE
+// =====================================================
+
+var mouse_gui_x =
+    device_mouse_x_to_gui(0);
+
+var mouse_gui_y =
+    device_mouse_y_to_gui(0);
 
 
 // =====================================================
 // RESOURCE SCROLL
 // =====================================================
 
-if (mx >= ui.pool_x1 && mx <= ui.pool_x2 &&
-    my >= ui.pool_y1 && my <= ui.pool_y2)
+if (
+    mouse_gui_x >= ui.pool_x1 &&
+    mouse_gui_x <= ui.pool_x2 &&
+    mouse_gui_y >= ui.pool_y1 &&
+    mouse_gui_y <= ui.pool_y2
+)
 {
-    var max_scroll = max(
-        0,
-        array_length(resources) - ui.visible_rows
-    );
+    var resource_max_scroll =
+        max(
+            0,
+            array_length(resources) -
+            ui.visible_rows
+        );
+
 
     if (mouse_wheel_down())
     {
-        resource_scroll = min(
-            max_scroll,
-            resource_scroll + 1
-        );
+        resource_scroll =
+            min(
+                resource_max_scroll,
+                resource_scroll + 1
+            );
     }
+
 
     if (mouse_wheel_up())
     {
-        resource_scroll = max(
-            0,
-            resource_scroll - 1
-        );
+        resource_scroll =
+            max(
+                0,
+                resource_scroll - 1
+            );
     }
 }
 
 
 // =====================================================
-// BOOK SCROLL
+// RECIPE BOOK NAVIGATION
+//
+// Wheel while mouse is over the book.
+// Arrow keys work while the book is open.
+//
+// Navigation wraps:
+// Item 20 -> Item 01
+// Item 01 -> Item 20
 // =====================================================
 
-if (book_open &&
-    mx >= ui.book_x1 && mx <= ui.book_x2 &&
-    my >= ui.book_header_y2 && my <= ui.book_y2)
-{
-    if (mouse_wheel_down())
-    {
-        book_index = min(
-            array_length(recipes) - 1,
-            book_index + 1
-        );
-    }
+var mouse_over_book =
+    mouse_gui_x >= ui.book_x1
+    &&
+    mouse_gui_x <= ui.book_x2
+    &&
+    mouse_gui_y >= ui.book_y1
+    &&
+    mouse_gui_y <= ui.book_y2;
 
+
+// -----------------------------------------------------
+// MOUSE WHEEL
+// -----------------------------------------------------
+
+if (
+    book_open &&
+    mouse_over_book
+)
+{
     if (mouse_wheel_up())
     {
-        book_index = max(
-            0,
-            book_index - 1
-        );
+        book_index--;
+
+
+        if (book_index < 0)
+        {
+            book_index =
+                array_length(recipes) - 1;
+        }
+    }
+
+
+    if (mouse_wheel_down())
+    {
+        book_index++;
+
+
+        if (
+            book_index >=
+            array_length(recipes)
+        )
+        {
+            book_index = 0;
+        }
+    }
+}
+
+
+// -----------------------------------------------------
+// KEYBOARD ARROWS
+// -----------------------------------------------------
+
+if (book_open)
+{
+    if (
+        keyboard_check_pressed(
+            vk_left
+        )
+    )
+    {
+        book_index--;
+
+
+        if (book_index < 0)
+        {
+            book_index =
+                array_length(recipes) - 1;
+        }
+    }
+
+
+    if (
+        keyboard_check_pressed(
+            vk_right
+        )
+    )
+    {
+        book_index++;
+
+
+        if (
+            book_index >=
+            array_length(recipes)
+        )
+        {
+            book_index = 0;
+        }
     }
 }
 
 
 // =====================================================
-// MOUSE PRESS
+// LEFT MOUSE PRESSED
 // =====================================================
 
 if (mouse_check_button_pressed(mb_left))
 {
+    // -------------------------------------------------
+    // RESET DRAG
+    // -------------------------------------------------
+
     drag_kind = 0;
     drag_value = -1;
     drag_from = -1;
 
 
-    // -------------------------------------------------
-    // OPEN / CLOSE BOOK
-    // -------------------------------------------------
+    // =================================================
+    // BOOK HEADER
+    // =====================================================
 
-    if (mx >= ui.book_x1 && mx <= ui.book_x2 &&
-        my >= ui.book_y1 && my < ui.book_header_y2)
-    {
-        book_open = !book_open;
-    }
-    else if (
-        book_open &&
-        mx >= ui.book_x1 + 10 &&
-        mx <= ui.book_x2 - 10 &&
-        my >= ui.book_nav_y1 &&
-        my <= ui.book_nav_y2
+    if (
+        mouse_gui_x >= ui.book_x1 &&
+        mouse_gui_x <= ui.book_x2 &&
+        mouse_gui_y >= ui.book_y1 &&
+        mouse_gui_y < ui.book_header_y2
     )
     {
-        if (mx < (ui.book_x1 + ui.book_x2) * 0.5)
-        {
-            book_index = max(
-                0,
-                book_index - 1
-            );
-        }
-        else
-        {
-            book_index = min(
-                array_length(recipes) - 1,
-                book_index + 1
-            );
-        }
+        book_open =
+            !book_open;
     }
 
 
-// -------------------------------------------------
-// MODULE BAR
-// -------------------------------------------------
+    // =================================================
+    // MODULE BAR
+    // =====================================================
 
-if (drag_kind == 0)
-{
-    for (var s = 0; s < 12; s++)
+    for (var module_slot = 0;
+         module_slot < 12;
+         module_slot++)
     {
-        var sx = ui.module_x + s * ui.module_gap;
+        var module_pos_x =
+            ui.module_x +
+            module_slot *
+            ui.module_gap;
 
-        if (mx >= sx &&
-            mx < sx + ui.module_size &&
-            my >= ui.module_y &&
-            my < ui.module_y + ui.module_size)
+
+        if (
+            mouse_gui_x >= module_pos_x &&
+            mouse_gui_x <
+            module_pos_x +
+            ui.module_size &&
+            mouse_gui_y >= ui.module_y &&
+            mouse_gui_y <
+            ui.module_y +
+            ui.module_size
+        )
         {
             drag_kind = 1;
             drag_from = -1;
 
-            if (s < 9)
+
+            if (module_slot < 9)
             {
-                // 0 = MODUL_C
-                // 1 = MODUL_M
-                // 2 = MODUL_Y
-                drag_value = s div 3;
+                drag_value =
+                    module_slot div 3;
             }
             else
             {
-                // 3 = -10% FAIL
-                // 4 = 30% BACK
-                // 5 = 2% FIND
-                drag_value = 3 + (s - 9);
+                drag_value =
+                    3 +
+                    (module_slot - 9);
             }
+
 
             break;
         }
     }
-}
 
-    // -------------------------------------------------
-    // RESOURCE PREV / NEXT
-    // -------------------------------------------------
 
-    if (drag_kind == 0 &&
-        mx >= ui.resource_x1 &&
-        mx <= ui.resource_x2 &&
-        my >= ui.pool_nav_y1 &&
-        my <= ui.pool_nav_y2)
+    // =================================================
+    // RESOURCE NAVIGATION
+    // =====================================================
+
+    if (
+        drag_kind == 0 &&
+        mouse_gui_x >= ui.resource_x1 &&
+        mouse_gui_x <= ui.resource_x2 &&
+        mouse_gui_y >= ui.pool_nav_y1 &&
+        mouse_gui_y <= ui.pool_nav_y2
+    )
     {
-        var max_scroll_nav = max(
-            0,
-            array_length(resources) - ui.visible_rows
-        );
-
-        var middle =
-            (ui.resource_x1 + ui.resource_x2) * 0.5;
-
-        if (mx < middle)
-        {
-            resource_scroll = max(
+        var nav_max_scroll =
+            max(
                 0,
-                resource_scroll - ui.visible_rows
+                array_length(resources) -
+                ui.visible_rows
             );
+
+
+        var resource_center =
+            (
+                ui.resource_x1 +
+                ui.resource_x2
+            )
+            *
+            0.5;
+
+
+        if (mouse_gui_x < resource_center)
+        {
+            resource_scroll =
+                max(
+                    0,
+                    resource_scroll -
+                    ui.visible_rows
+                );
         }
         else
         {
-            resource_scroll = min(
-                max_scroll_nav,
-                resource_scroll + ui.visible_rows
-            );
+            resource_scroll =
+                min(
+                    nav_max_scroll,
+                    resource_scroll +
+                    ui.visible_rows
+                );
         }
     }
 
 
-    // -------------------------------------------------
+    // =================================================
     // PICK RESOURCE FROM LIST
-    // -------------------------------------------------
+    // =====================================================
 
-    if (drag_kind == 0 &&
-        mx >= ui.resource_x1 &&
-        mx <= ui.resource_x2)
+    if (
+        drag_kind == 0 &&
+        mouse_gui_x >= ui.resource_x1 &&
+        mouse_gui_x <= ui.resource_x2
+    )
     {
-        for (var list_row = 0;
-             list_row < ui.visible_rows;
-             list_row++)
+        for (var resource_row = 0;
+             resource_row < ui.visible_rows;
+             resource_row++)
         {
-            var r =
+            var resource_pick_index =
                 resource_scroll +
-                list_row;
+                resource_row;
 
-            var ry =
-                ui.resource_y +
-                list_row * ui.resource_gap;
 
             if (
-                r < array_length(resources) &&
-                my >= ry &&
-                my < ry + ui.resource_height &&
-                get_resource_count(r) > 0
+                resource_pick_index >=
+                array_length(resources)
             )
             {
-                drag_kind = 2;
-                drag_value = r;
+                break;
+            }
+
+
+            var resource_pos_y =
+                ui.resource_y +
+                resource_row *
+                ui.resource_gap;
+
+
+            if (
+                mouse_gui_y >= resource_pos_y &&
+                mouse_gui_y <
+                resource_pos_y +
+                ui.resource_height
+            )
+            {
+                if (
+                    get_resource_count(
+                        resource_pick_index
+                    ) > 0
+                )
+                {
+                    drag_kind = 2;
+
+                    drag_value =
+                        resource_pick_index;
+
+                    drag_from = -1;
+                }
+
 
                 break;
             }
@@ -217,62 +354,102 @@ if (drag_kind == 0)
     }
 
 
-    // -------------------------------------------------
+    // =================================================
     // PICK FROM GRID
-    // -------------------------------------------------
+    // =====================================================
 
-    if (drag_kind == 0 &&
-        mx >= grid_x &&
-        mx < grid_x + cell_size * 3 &&
-        my >= grid_y &&
-        my < grid_y + cell_size * 3)
+    if (
+        drag_kind == 0 &&
+        mouse_gui_x >= grid_x &&
+        mouse_gui_x <
+        grid_x + cell_size * 3 &&
+        mouse_gui_y >= grid_y &&
+        mouse_gui_y <
+        grid_y + cell_size * 3
+    )
     {
-        var grid_col =
-            floor((mx - grid_x) / cell_size);
+        var pick_grid_col =
+            floor(
+                (mouse_gui_x - grid_x)
+                /
+                cell_size
+            );
 
-        var grid_row =
-            floor((my - grid_y) / cell_size);
 
-        var grid_index =
-            grid_row * 3 + grid_col;
+        var pick_grid_row =
+            floor(
+                (mouse_gui_y - grid_y)
+                /
+                cell_size
+            );
 
-        if (grid_items[grid_index] != -1)
+
+        var pick_grid_index =
+            pick_grid_row * 3 +
+            pick_grid_col;
+
+
+        // Resource has priority.
+
+        if (
+            grid_items[
+                pick_grid_index
+            ] != -1
+        )
         {
             drag_kind = 2;
-            drag_value = grid_items[grid_index];
-            drag_from = grid_index;
+
+            drag_value =
+                grid_items[
+                    pick_grid_index
+                ];
+
+            drag_from =
+                pick_grid_index;
         }
-        else if (grid_modules[grid_index] != -1)
+        else if (
+            grid_modules[
+                pick_grid_index
+            ] != -1
+        )
         {
             drag_kind = 1;
-            drag_value = grid_modules[grid_index];
-            drag_from = grid_index;
+
+            drag_value =
+                grid_modules[
+                    pick_grid_index
+                ];
+
+            drag_from =
+                pick_grid_index;
         }
     }
 
 
     // =================================================
-    // RESET
-    // =================================================
+    // RESET BUTTON
+    // =====================================================
 
-    if (mx >= ui.reset_x1 &&
-        mx <= ui.reset_x2 &&
-        my >= ui.button_y1 &&
-        my <= ui.button_y2)
+    if (
+        mouse_gui_x >= ui.reset_x1 &&
+        mouse_gui_x <= ui.reset_x2 &&
+        mouse_gui_y >= ui.button_y1 &&
+        mouse_gui_y <= ui.button_y2
+    )
     {
-        for (var i = 0; i < 9; i++)
+        for (var reset_cell = 0;
+             reset_cell < 9;
+             reset_cell++)
         {
-            if (grid_items[i] != -1)
-            {
-                return_resource(
-                    grid_items[i],
-                    1
-                );
-            }
+            grid_modules[
+                reset_cell
+            ] = -1;
 
-            grid_items[i] = -1;
-            grid_modules[i] = -1;
+            grid_items[
+                reset_cell
+            ] = -1;
         }
+
 
         drag_kind = 0;
         drag_value = -1;
@@ -284,139 +461,425 @@ if (drag_kind == 0)
 
 
     // =================================================
-    // RANDOM
-    // =================================================
+    // RANDOM BUTTON
+    // =====================================================
 
-    if (mx >= ui.random_x1 &&
-        mx <= ui.random_x2 &&
-        my >= ui.button_y1 &&
-        my <= ui.button_y2)
+    if (
+        mouse_gui_x >= ui.random_x1 &&
+        mouse_gui_x <= ui.random_x2 &&
+        mouse_gui_y >= ui.button_y1 &&
+        mouse_gui_y <= ui.button_y2
+    )
     {
-        // Сначала возвращаем всё, что уже лежит
-        // в сетке, обратно в GLOBAL material pool.
+        // ---------------------------------------------
+        // CLEAR GRID
+        // ---------------------------------------------
 
-        for (var i = 0; i < 9; i++)
+        for (var random_clear_cell = 0;
+             random_clear_cell < 9;
+             random_clear_cell++)
         {
-            if (grid_items[i] != -1)
-            {
-                return_resource(
-                    grid_items[i],
-                    1
-                );
-            }
+            grid_modules[
+                random_clear_cell
+            ] = -1;
 
-            grid_items[i] = -1;
-            grid_modules[i] = -1;
+            grid_items[
+                random_clear_cell
+            ] = -1;
         }
 
 
         // ---------------------------------------------
-        // 1-5 обычных ресурсов
+        // NUMBER OF NORMAL RESOURCES
         // ---------------------------------------------
 
-        var amount = irandom_range(1, 5);
-        var placed = 0;
+        var random_resource_amount =
+            irandom_range(1, 5);
 
-        while (placed < amount)
+        var random_placed =
+            0;
+
+        var random_attempts =
+            0;
+
+
+        // ---------------------------------------------
+        // PLACE NORMAL RESOURCES
+        // ---------------------------------------------
+
+        while (
+            random_placed <
+            random_resource_amount &&
+            random_attempts < 200
+        )
         {
-            var random_cell = irandom(8);
+            random_attempts++;
 
-            if (grid_modules[random_cell] == -1)
+
+            var random_grid_cell =
+                irandom(8);
+
+
+            if (
+                grid_modules[
+                    random_grid_cell
+                ] != -1
+            )
             {
-                var module_type = irandom(2);
+                continue;
+            }
 
-                var available = [];
 
-                for (var rr = 0;
-                     rr < array_length(resources);
-                     rr++)
+            var random_module_type =
+                irandom(2);
+
+
+            // -----------------------------------------
+            // COUNT COMPATIBLE AVAILABLE RESOURCES
+            // -----------------------------------------
+
+            var compatible_count =
+                0;
+
+
+            for (
+                var random_resource_check = 0;
+                random_resource_check <
+                array_length(resources);
+                random_resource_check++
+            )
+            {
+                if (
+                    resource_modules[
+                        random_resource_check
+                    ]
+                    ==
+                    random_module_type
+                )
                 {
                     if (
-                        resource_modules[rr] == module_type &&
-                        get_resource_count(rr) > 0
+                        get_resource_count(
+                            random_resource_check
+                        ) > 0
                     )
                     {
-                        array_push(
-                            available,
-                            rr
-                        );
+                        compatible_count++;
+                    }
+                }
+            }
+
+
+            if (compatible_count <= 0)
+            {
+                continue;
+            }
+
+
+            // -----------------------------------------
+            // PICK COMPATIBLE RESOURCE
+            // -----------------------------------------
+
+            var compatible_pick =
+                irandom(
+                    compatible_count - 1
+                );
+
+            var compatible_seen =
+                0;
+
+            var selected_resource =
+                -1;
+
+
+            for (
+                var random_resource_find = 0;
+                random_resource_find <
+                array_length(resources);
+                random_resource_find++
+            )
+            {
+                if (
+                    resource_modules[
+                        random_resource_find
+                    ]
+                    ==
+                    random_module_type
+                )
+                {
+                    if (
+                        get_resource_count(
+                            random_resource_find
+                        ) > 0
+                    )
+                    {
+                        if (
+                            compatible_seen ==
+                            compatible_pick
+                        )
+                        {
+                            selected_resource =
+                                random_resource_find;
+
+                            break;
+                        }
+
+
+                        compatible_seen++;
+                    }
+                }
+            }
+
+
+            if (selected_resource != -1)
+            {
+                grid_modules[
+                    random_grid_cell
+                ] =
+                    random_module_type;
+
+
+                grid_items[
+                    random_grid_cell
+                ] =
+                    selected_resource;
+
+
+                random_placed++;
+            }
+        }
+
+
+        // ---------------------------------------------
+        // PLACE 1-3 UNIQUE BUFF MODULES
+        // ---------------------------------------------
+
+        var random_free_cells =
+            9 - random_placed;
+
+
+        if (random_free_cells > 0)
+        {
+            var random_buff_amount =
+                irandom_range(
+                    1,
+                    min(
+                        3,
+                        random_free_cells
+                    )
+                );
+
+
+            var buff_available_0 =
+                true;
+
+            var buff_available_1 =
+                true;
+
+            var buff_available_2 =
+                true;
+
+
+            for (
+                var random_buff_number = 0;
+                random_buff_number <
+                random_buff_amount;
+                random_buff_number++
+            )
+            {
+                var available_buff_count =
+                    0;
+
+
+                if (buff_available_0)
+                {
+                    available_buff_count++;
+                }
+
+                if (buff_available_1)
+                {
+                    available_buff_count++;
+                }
+
+                if (buff_available_2)
+                {
+                    available_buff_count++;
+                }
+
+
+                if (available_buff_count <= 0)
+                {
+                    break;
+                }
+
+
+                var random_buff_pick =
+                    irandom(
+                        available_buff_count - 1
+                    );
+
+
+                var selected_buff =
+                    -1;
+
+                var buff_seen =
+                    0;
+
+
+                if (buff_available_0)
+                {
+                    if (
+                        buff_seen ==
+                        random_buff_pick
+                    )
+                    {
+                        selected_buff = 3;
+                    }
+
+                    buff_seen++;
+                }
+
+
+                if (
+                    selected_buff == -1 &&
+                    buff_available_1
+                )
+                {
+                    if (
+                        buff_seen ==
+                        random_buff_pick
+                    )
+                    {
+                        selected_buff = 4;
+                    }
+
+                    buff_seen++;
+                }
+
+
+                if (
+                    selected_buff == -1 &&
+                    buff_available_2
+                )
+                {
+                    if (
+                        buff_seen ==
+                        random_buff_pick
+                    )
+                    {
+                        selected_buff = 5;
                     }
                 }
 
-                // Есть подходящий ресурс.
-                if (array_length(available) > 0)
+
+                if (selected_buff == 3)
                 {
-                    var choice =
-                        available[
-                            irandom(
-                                array_length(available) - 1
-                            )
-                        ];
+                    buff_available_0 =
+                        false;
+                }
 
-                    grid_modules[random_cell] =
-                        module_type;
+                if (selected_buff == 4)
+                {
+                    buff_available_1 =
+                        false;
+                }
 
-                    grid_items[random_cell] =
-                        choice;
+                if (selected_buff == 5)
+                {
+                    buff_available_2 =
+                        false;
+                }
 
-                    spend_resource(
-                        choice,
-                        1
+
+                // -------------------------------------
+                // FIND RANDOM EMPTY CELL
+                // -------------------------------------
+
+                var empty_count =
+                    0;
+
+
+                for (var empty_check = 0;
+                     empty_check < 9;
+                     empty_check++)
+                {
+                    if (
+                        grid_modules[
+                            empty_check
+                        ] == -1
+                        &&
+                        grid_items[
+                            empty_check
+                        ] == -1
+                    )
+                    {
+                        empty_count++;
+                    }
+                }
+
+
+                if (empty_count <= 0)
+                {
+                    break;
+                }
+
+
+                var empty_pick =
+                    irandom(
+                        empty_count - 1
                     );
 
-                    placed++;
-                }
-                else
+                var empty_seen =
+                    0;
+
+                var selected_empty_cell =
+                    -1;
+
+
+                for (var empty_find = 0;
+                     empty_find < 9;
+                     empty_find++)
                 {
-                    // Для этого типа сейчас нет ресурсов.
-                    // Ничего в клетку не ставим.
+                    if (
+                        grid_modules[
+                            empty_find
+                        ] == -1
+                        &&
+                        grid_items[
+                            empty_find
+                        ] == -1
+                    )
+                    {
+                        if (
+                            empty_seen ==
+                            empty_pick
+                        )
+                        {
+                            selected_empty_cell =
+                                empty_find;
+
+                            break;
+                        }
+
+
+                        empty_seen++;
+                    }
+                }
+
+
+                if (
+                    selected_empty_cell != -1
+                    &&
+                    selected_buff != -1
+                )
+                {
+                    grid_modules[
+                        selected_empty_cell
+                    ] =
+                        selected_buff;
                 }
             }
         }
 
-
-        // ---------------------------------------------
-        // 1-3 разные BUFF-звезды
-        // ---------------------------------------------
-
-        var buff_amount =
-            irandom_range(
-                1,
-                min(3, 9 - placed)
-            );
-
-        var buff_types = [3, 4, 5];
-
-        repeat (buff_amount)
-        {
-            var buff_pick =
-                irandom(
-                    array_length(buff_types) - 1
-                );
-
-            var buff_type =
-                buff_types[buff_pick];
-
-            array_delete(
-                buff_types,
-                buff_pick,
-                1
-            );
-
-            var buff_cell =
-                irandom(8);
-
-            while (grid_modules[buff_cell] != -1)
-            {
-                buff_cell = irandom(8);
-            }
-
-            grid_modules[buff_cell] =
-                buff_type;
-
-            // BUFF не содержит ресурс.
-            grid_items[buff_cell] = -1;
-        }
 
         drag_kind = 0;
         drag_value = -1;
@@ -428,304 +891,775 @@ if (drag_kind == 0)
 
 
     // =================================================
-    // CRAFT
-    // =================================================
+    // CRAFT BUTTON
+    // =====================================================
 
-    if (mx >= ui.craft_x1 &&
-        mx <= ui.craft_x2 &&
-        my >= ui.button_y1 &&
-        my <= ui.button_y2)
+    if (
+        mouse_gui_x >= ui.craft_x1 &&
+        mouse_gui_x <= ui.craft_x2 &&
+        mouse_gui_y >= ui.button_y1 &&
+        mouse_gui_y <= ui.button_y2
+    )
     {
-        var found_recipe =
+        var craft_recipe_index =
             find_grid_recipe();
 
-        if (found_recipe == -1)
+
+        // ---------------------------------------------
+        // INVALID RECIPE
+        // ---------------------------------------------
+
+        if (craft_recipe_index == -1)
         {
             craft_result = 0;
-            craft_note = "";
+            craft_note = "NO RECIPE";
         }
         else
         {
-            // Эффекты считаем ДО очистки поля.
+            // =========================================
+            // CHECK RESOURCES
+            // =========================================
 
-            var failure =
-                get_craft_failure(
-                    found_recipe
-                );
-
-            var return_chance =
-                get_buff_rate(1);
-
-            var discover_chance =
-                get_buff_rate(2);
+            var need_stone = 0;
+            var need_polyester = 0;
+            var need_tree = 0;
+            var need_cloth = 0;
+            var need_glass = 0;
+            var need_jewels = 0;
+            var need_mushrooms = 0;
+            var need_blood = 0;
 
 
-            // Запоминаем потраченные ресурсы.
-
-            var spent = [];
-
-            for (var cell = 0;
-                 cell < 9;
-                 cell++)
+            for (
+                var craft_check_cell = 0;
+                craft_check_cell < 9;
+                craft_check_cell++
+            )
             {
-                if (grid_items[cell] != -1)
+                if (
+                    grid_items[
+                        craft_check_cell
+                    ] != -1
+                )
                 {
-                    array_push(
-                        spent,
-                        grid_items[cell]
-                    );
+                    var craft_resource_index =
+                        grid_items[
+                            craft_check_cell
+                        ];
+
+
+                    var craft_resource_group =
+                        resource_tags[
+                            craft_resource_index
+                        ];
+
+
+                    switch (craft_resource_group)
+                    {
+                        case "stone":
+                            need_stone++;
+                        break;
+
+
+                        case "polyester":
+                            need_polyester++;
+                        break;
+
+
+                        case "tree":
+                            need_tree++;
+                        break;
+
+
+                        case "cloth":
+                            need_cloth++;
+                        break;
+
+
+                        case "glass":
+                            need_glass++;
+                        break;
+
+
+                        case "jewels":
+                            need_jewels++;
+                        break;
+
+
+                        case "mushrooms":
+                            need_mushrooms++;
+                        break;
+
+
+                        case "blood":
+                            need_blood++;
+                        break;
+                    }
                 }
-
-                // Ресурс уже был списан в момент
-                // помещения в сетку.
-                // Поэтому здесь НЕ возвращаем его.
-                grid_items[cell] = -1;
             }
 
 
-            var failed =
-                random(100) < failure;
-
-            craft_result =
-                failed ? 2 : 1;
-
-            craft_note = "";
+            var craft_has_resources =
+                true;
 
 
-            // -----------------------------------------
-            // DISCOVER CURRENT RECIPE
-            // -----------------------------------------
-
-            if (!failed &&
-                !discovered[found_recipe])
+            if (
+                global.material_pool.stone <
+                need_stone
+            )
             {
-                discovered[found_recipe] = true;
-                discovered_count++;
+                craft_has_resources = false;
             }
 
 
-            // -----------------------------------------
-            // RESOURCE BACK BUFF
-            // -----------------------------------------
-
-            if (array_length(spent) > 0 &&
-                random(100) < return_chance)
+            if (
+                global.material_pool.polyester <
+                need_polyester
+            )
             {
-                var returned =
-                    spent[
-                        irandom(
-                            array_length(spent) - 1
-                        )
-                    ];
+                craft_has_resources = false;
+            }
 
-                return_resource(
-                    returned,
-                    1
-                );
+
+            if (
+                global.material_pool.tree <
+                need_tree
+            )
+            {
+                craft_has_resources = false;
+            }
+
+
+            if (
+                global.material_pool.cloth <
+                need_cloth
+            )
+            {
+                craft_has_resources = false;
+            }
+
+
+            if (
+                global.material_pool.glass <
+                need_glass
+            )
+            {
+                craft_has_resources = false;
+            }
+
+
+            if (
+                global.material_pool.jewels <
+                need_jewels
+            )
+            {
+                craft_has_resources = false;
+            }
+
+
+            if (
+                global.material_pool.mushrooms <
+                need_mushrooms
+            )
+            {
+                craft_has_resources = false;
+            }
+
+
+            if (
+                global.material_pool.blood <
+                need_blood
+            )
+            {
+                craft_has_resources = false;
+            }
+
+
+            // =========================================
+            // NOT ENOUGH RESOURCES
+            // =========================================
+
+            if (!craft_has_resources)
+            {
+                craft_result = 0;
 
                 craft_note =
-                    "+" +
-                    resources[returned];
+                    "NOT ENOUGH RESOURCES";
             }
-
-
-            // -----------------------------------------
-            // RANDOM RECIPE DISCOVERY BUFF
-            // -----------------------------------------
-
-            if (!failed &&
-                random(100) < discover_chance)
+            else
             {
-                var unknown = [];
+                // =====================================
+                // CALCULATE BEFORE MODIFYING GRID
+                // =====================================
 
-                for (var p = 0;
-                     p < array_length(recipes);
-                     p++)
+                var craft_failure_chance =
+                    get_craft_failure(
+                        craft_recipe_index
+                    );
+
+
+                var craft_return_chance =
+                    get_buff_rate(1);
+
+
+                var craft_discover_chance =
+                    get_buff_rate(2);
+
+
+                // =====================================
+                // BUILD SPENT RESOURCE LIST
+                // =====================================
+
+                var spent_resources =
+                    [];
+
+
+                for (var spend_cell = 0;
+                     spend_cell < 9;
+                     spend_cell++)
                 {
-                    if (!discovered[p])
+                    if (
+                        grid_items[
+                            spend_cell
+                        ] != -1
+                    )
                     {
                         array_push(
-                            unknown,
-                            p
+                            spent_resources,
+
+                            grid_items[
+                                spend_cell
+                            ]
                         );
                     }
                 }
 
-                if (array_length(unknown) > 0)
+
+                // =====================================
+                // SPEND RESOURCES
+                // =====================================
+
+                for (
+                    var spend_index = 0;
+                    spend_index <
+                    array_length(
+                        spent_resources
+                    );
+                    spend_index++
+                )
                 {
-                    var unlocked =
-                        unknown[
-                            irandom(
-                                array_length(unknown) - 1
-                            )
-                        ];
-
-                    discovered[unlocked] = true;
-                    discovered_count++;
-
-                    book_index =
-                        unlocked;
-
-                    craft_note +=
-                        " +" +
-                        recipes[unlocked].name;
-                }
-            }
-        }
-    }
-}
-
-
-// =====================================================
-// MOUSE RELEASE
-// =====================================================
-
-if (mouse_check_button_released(mb_left) &&
-    drag_kind != 0)
-{
-    var over_grid =
-        mx >= grid_x &&
-        mx < grid_x + cell_size * 3 &&
-        my >= grid_y &&
-        my < grid_y + cell_size * 3;
-
-
-    if (over_grid)
-    {
-        var target_col =
-            floor((mx - grid_x) / cell_size);
-
-        var target_row =
-            floor((my - grid_y) / cell_size);
-
-        var target =
-            target_row * 3 + target_col;
-
-
-// =============================================
-// PLACE MODULE
-// =============================================
-
-if (drag_kind == 1)
-{
-    var ordinary_count = 0;
-    var already_used = false;
-
-    for (var i = 0; i < 9; i++)
-    {
-        // Обычные модули
-        if (grid_modules[i] >= 0 &&
-            grid_modules[i] <= 2)
-        {
-            ordinary_count++;
-        }
-
-        // Каждая BUFF-звезда может быть
-        // на поле только один раз.
-        if (drag_value >= 3 &&
-            grid_modules[i] == drag_value &&
-            i != drag_from)
-        {
-            already_used = true;
-        }
-    }
-
-    var can_place = true;
-
-    // Нельзя бросать поверх другого модуля.
-    if (grid_modules[target] != -1 &&
-        target != drag_from)
-    {
-        can_place = false;
-    }
-
-    // Нельзя иметь две одинаковые BUFF-звезды.
-    if (drag_value >= 3 && already_used)
-    {
-        can_place = false;
-    }
-
-    // С верхней панели разрешено максимум
-    // 5 обычных модулей.
-    if (drag_value <= 2 &&
-        drag_from == -1 &&
-        ordinary_count >= 5)
-    {
-        can_place = false;
-    }
-
-    if (can_place && target != drag_from)
-    {
-        grid_modules[target] = drag_value;
-
-        // Если двигаем модуль внутри сетки,
-        // очищаем старую клетку.
-        if (drag_from != -1)
-        {
-            grid_modules[drag_from] = -1;
-        }
-
-        craft_result = 0;
-        craft_note = "";
-    }
-}
-        // =============================================
-        // PLACE RESOURCE
-        // =============================================
-
-        if (drag_kind == 2)
-        {
-            // Нельзя класть ресурс в пустую клетку.
-            if (grid_modules[target] == -1)
-            {
-                // Ничего.
-            }
-
-            // Ресурс должен соответствовать
-            // обычному модулю.
-            // BUFF 3-5 автоматически сюда не подходит.
-            else if (
-                grid_modules[target] !=
-                resource_modules[drag_value]
-            )
-            {
-                // Ничего.
-            }
-
-            else if (target != drag_from)
-            {
-                // Если в target уже лежал ресурс,
-                // возвращаем его в экономику.
-
-                if (grid_items[target] != -1)
-                {
-                    return_resource(
-                        grid_items[target],
+                    spend_resource(
+                        spent_resources[
+                            spend_index
+                        ],
                         1
                     );
                 }
 
 
-                grid_items[target] =
+                // =====================================
+                // CRAFT ROLL
+                // =====================================
+
+                var craft_failed =
+                    random(100) <
+                    craft_failure_chance;
+
+
+                if (craft_failed)
+                {
+                    craft_result = 2;
+
+                    craft_note =
+                        "CRAFT FAILED";
+                }
+                else
+                {
+                    craft_result = 1;
+
+
+                    // ---------------------------------
+                    // DISCOVER CRAFTED RECIPE
+                    // ---------------------------------
+
+                    var craft_was_new =
+                        discover_recipe(
+                            craft_recipe_index
+                        );
+
+
+                    // ---------------------------------
+                    // ADD ITEM
+                    // ---------------------------------
+
+                    add_crafted_item(
+                        craft_recipe_index,
+                        1
+                    );
+
+
+                    if (craft_was_new)
+                    {
+                        craft_note =
+                            "DISCOVERED: "
+                            +
+                            recipes[
+                                craft_recipe_index
+                            ].name;
+                    }
+                    else
+                    {
+                        craft_note =
+                            "+1 "
+                            +
+                            recipes[
+                                craft_recipe_index
+                            ].name;
+                    }
+                }
+
+
+                // =====================================
+                // BACK BUFF
+                // =====================================
+
+                if (
+                    array_length(
+                        spent_resources
+                    ) > 0
+                )
+                {
+                    if (
+                        random(100) <
+                        craft_return_chance
+                    )
+                    {
+                        var returned_index =
+                            irandom(
+                                array_length(
+                                    spent_resources
+                                ) - 1
+                            );
+
+
+                        var returned_resource =
+                            spent_resources[
+                                returned_index
+                            ];
+
+
+                        return_resource(
+                            returned_resource,
+                            1
+                        );
+
+
+                        craft_note +=
+                            " | BACK: "
+                            +
+                            resources[
+                                returned_resource
+                            ];
+                    }
+                }
+
+
+                // =====================================
+                // FIND BUFF
+                // =====================================
+
+                if (
+                    random(100) <
+                    craft_discover_chance
+                )
+                {
+                    var unknown_recipe_count =
+                        0;
+
+
+                    for (
+                        var unknown_count_i = 0;
+                        unknown_count_i <
+                        array_length(recipes);
+                        unknown_count_i++
+                    )
+                    {
+                        if (
+                            !is_recipe_discovered(
+                                unknown_count_i
+                            )
+                        )
+                        {
+                            unknown_recipe_count++;
+                        }
+                    }
+
+
+                    if (unknown_recipe_count > 0)
+                    {
+                        var unknown_pick =
+                            irandom(
+                                unknown_recipe_count - 1
+                            );
+
+
+                        var unknown_seen =
+                            0;
+
+                        var unlocked_recipe =
+                            -1;
+
+
+                        for (
+                            var unknown_find_i = 0;
+                            unknown_find_i <
+                            array_length(recipes);
+                            unknown_find_i++
+                        )
+                        {
+                            if (
+                                !is_recipe_discovered(
+                                    unknown_find_i
+                                )
+                            )
+                            {
+                                if (
+                                    unknown_seen ==
+                                    unknown_pick
+                                )
+                                {
+                                    unlocked_recipe =
+                                        unknown_find_i;
+
+                                    break;
+                                }
+
+
+                                unknown_seen++;
+                            }
+                        }
+
+
+                        if (unlocked_recipe != -1)
+                        {
+                            if (
+                                discover_recipe(
+                                    unlocked_recipe
+                                )
+                            )
+                            {
+                                book_index =
+                                    unlocked_recipe;
+
+
+                                craft_note +=
+                                    " | FOUND: "
+                                    +
+                                    recipes[
+                                        unlocked_recipe
+                                    ].name;
+                            }
+                        }
+                    }
+                }
+
+
+                // =====================================
+                // CLEAR RESOURCES AFTER ATTEMPT
+                // =====================================
+
+                for (
+                    var craft_clear_cell = 0;
+                    craft_clear_cell < 9;
+                    craft_clear_cell++
+                )
+                {
+                    grid_items[
+                        craft_clear_cell
+                    ] = -1;
+                }
+
+
+                drag_kind = 0;
+                drag_value = -1;
+                drag_from = -1;
+            }
+        }
+    }
+}
+
+
+// =====================================================
+// LEFT MOUSE RELEASED
+// =====================================================
+
+if (
+    mouse_check_button_released(
+        mb_left
+    )
+    &&
+    drag_kind != 0
+)
+{
+    var mouse_over_grid =
+        mouse_gui_x >= grid_x
+        &&
+        mouse_gui_x <
+        grid_x + cell_size * 3
+        &&
+        mouse_gui_y >= grid_y
+        &&
+        mouse_gui_y <
+        grid_y + cell_size * 3;
+
+
+    // =================================================
+    // DROP ON GRID
+    // =====================================================
+
+    if (mouse_over_grid)
+    {
+        var drop_col =
+            floor(
+                (mouse_gui_x - grid_x)
+                /
+                cell_size
+            );
+
+
+        var drop_row =
+            floor(
+                (mouse_gui_y - grid_y)
+                /
+                cell_size
+            );
+
+
+        var drop_cell =
+            drop_row * 3 +
+            drop_col;
+
+
+        // =================================================
+        // MODULE
+        // =====================================================
+
+        if (drag_kind == 1)
+        {
+            var normal_module_count =
+                0;
+
+            var same_buff_exists =
+                false;
+
+
+            for (
+                var module_check_cell = 0;
+                module_check_cell < 9;
+                module_check_cell++
+            )
+            {
+                var existing_module =
+                    grid_modules[
+                        module_check_cell
+                    ];
+
+
+                if (
+                    existing_module >= 0 &&
+                    existing_module <= 2
+                )
+                {
+                    normal_module_count++;
+                }
+
+
+                if (
+                    drag_value >= 3 &&
+                    existing_module ==
+                    drag_value &&
+                    module_check_cell !=
+                    drag_from
+                )
+                {
+                    same_buff_exists =
+                        true;
+                }
+            }
+
+
+            var module_can_drop =
+                true;
+
+
+            // Same cell.
+
+            if (drop_cell == drag_from)
+            {
+                module_can_drop =
+                    false;
+            }
+
+
+            // Target occupied.
+
+            if (
+                grid_modules[
+                    drop_cell
+                ] != -1
+                ||
+                grid_items[
+                    drop_cell
+                ] != -1
+            )
+            {
+                module_can_drop =
+                    false;
+            }
+
+
+            // Duplicate buff.
+
+            if (same_buff_exists)
+            {
+                module_can_drop =
+                    false;
+            }
+
+
+            // Max 5 normal modules.
+
+            if (
+                drag_value >= 0 &&
+                drag_value <= 2 &&
+                drag_from == -1 &&
+                normal_module_count >= 5
+            )
+            {
+                module_can_drop =
+                    false;
+            }
+
+
+            // Place / move.
+
+            if (module_can_drop)
+            {
+                grid_modules[
+                    drop_cell
+                ] =
                     drag_value;
 
 
-                // Ресурс пришёл из списка.
-                if (drag_from == -1)
+                if (drag_from != -1)
                 {
-                    spend_resource(
-                        drag_value,
-                        1
-                    );
+                    grid_modules[
+                        drag_from
+                    ] = -1;
                 }
 
-                // Ресурс перемещён из другой
-                // клетки сетки.
-                else
+
+                craft_result = 0;
+                craft_note = "";
+            }
+        }
+
+
+        // =================================================
+        // RESOURCE
+        // =====================================================
+
+        if (drag_kind == 2)
+        {
+            var resource_can_drop =
+                true;
+
+
+            // Invalid index.
+
+            if (
+                drag_value < 0 ||
+                drag_value >=
+                array_length(resources)
+            )
+            {
+                resource_can_drop =
+                    false;
+            }
+
+
+            // Needs module.
+
+            if (
+                grid_modules[
+                    drop_cell
+                ] == -1
+            )
+            {
+                resource_can_drop =
+                    false;
+            }
+
+
+            // Cannot go into buff.
+
+            if (
+                grid_modules[
+                    drop_cell
+                ] >= 3
+            )
+            {
+                resource_can_drop =
+                    false;
+            }
+
+
+            // Compatibility.
+
+            if (resource_can_drop)
+            {
+                if (
+                    grid_modules[
+                        drop_cell
+                    ]
+                    !=
+                    resource_modules[
+                        drag_value
+                    ]
+                )
                 {
-                    grid_items[drag_from] =
-                        -1;
+                    resource_can_drop =
+                        false;
                 }
+            }
+
+
+            // Same cell.
+
+            if (drop_cell == drag_from)
+            {
+                resource_can_drop =
+                    false;
+            }
+
+
+            // Place / move.
+
+            if (resource_can_drop)
+            {
+                grid_items[
+                    drop_cell
+                ] =
+                    drag_value;
+
+
+                if (drag_from != -1)
+                {
+                    grid_items[
+                        drag_from
+                    ] = -1;
+                }
+
 
                 craft_result = 0;
                 craft_note = "";
@@ -733,35 +1667,49 @@ if (drag_kind == 1)
         }
     }
 
-    // =================================================
-    // DROPPED OUTSIDE GRID
-    // =================================================
 
-    else if (drag_from != -1)
+    // =================================================
+    // DROP OUTSIDE GRID
+    // =====================================================
+
+    else
     {
-        if (drag_kind == 2)
-        {
-            // Ресурс был уже списан при первоначальном
-            // помещении в сетку — возвращаем его.
+        // Existing resource removed.
 
-            return_resource(
-                drag_value,
-                1
-            );
-
-            grid_items[drag_from] =
-                -1;
-        }
-        else
+        if (
+            drag_kind == 2 &&
+            drag_from != -1
+        )
         {
-            grid_modules[drag_from] =
-                -1;
+            grid_items[
+                drag_from
+            ] = -1;
+
+            craft_result = 0;
+            craft_note = "";
         }
 
-        craft_result = 0;
-        craft_note = "";
+
+        // Existing module removed.
+
+        if (
+            drag_kind == 1 &&
+            drag_from != -1
+        )
+        {
+            grid_modules[
+                drag_from
+            ] = -1;
+
+            craft_result = 0;
+            craft_note = "";
+        }
     }
 
+
+    // =================================================
+    // END DRAG
+    // =====================================================
 
     drag_kind = 0;
     drag_value = -1;

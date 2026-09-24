@@ -1,18 +1,19 @@
 /// obj_drone - Create Event
 
-
 // =====================================================
-// PANEL
+// ECONOMY LAYOUT
+// CENTER TOP
 // =====================================================
 
-drone_x = 610;
-drone_y = 515;
+drone_x = 575;
+drone_y = 135;
+
+drone_panel_w = 450;
+drone_panel_h = 370;
 
 
 // =====================================================
 // DRONE A
-// Random normal resource
-// 10 sec / +20..60
 // =====================================================
 
 drone_a_active = false;
@@ -20,16 +21,14 @@ drone_a_time = 0;
 drone_a_duration = 10;
 drone_a_result = "Ready";
 
-drone_a_button_x1 = drone_x;
-drone_a_button_y1 = drone_y + 70;
-drone_a_button_x2 = drone_x + 165;
-drone_a_button_y2 = drone_y + 100;
+drone_a_button_x1 = drone_x + 300;
+drone_a_button_y1 = drone_y + 90;
+drone_a_button_x2 = drone_x + 420;
+drone_a_button_y2 = drone_y + 125;
 
 
 // =====================================================
 // DRONE B
-// Random normal resource
-// 15 sec / +35..75
 // =====================================================
 
 drone_b_active = false;
@@ -37,19 +36,14 @@ drone_b_time = 0;
 drone_b_duration = 15;
 drone_b_result = "Ready";
 
-drone_b_button_x1 = drone_x;
-drone_b_button_y1 = drone_y + 175;
-drone_b_button_x2 = drone_x + 165;
-drone_b_button_y2 = drone_y + 205;
+drone_b_button_x1 = drone_x + 300;
+drone_b_button_y1 = drone_y + 190;
+drone_b_button_x2 = drone_x + 420;
+drone_b_button_y2 = drone_y + 225;
 
 
 // =====================================================
-// SCOUT DRONE
-//
-// Finds lowest NORMAL resource.
-// Mushrooms / Blood are excluded.
-//
-// 25 sec / +50
+// SCOUT
 // =====================================================
 
 scout_active = false;
@@ -62,7 +56,7 @@ scout_target_name = "";
 
 scout_result = "Finds lowest resource";
 
-scout_button_x1 = drone_x;
-scout_button_y1 = drone_y + 290;
-scout_button_x2 = drone_x + 165;
-scout_button_y2 = drone_y + 320;
+scout_button_x1 = drone_x + 300;
+scout_button_y1 = drone_y + 300;
+scout_button_x2 = drone_x + 420;
+scout_button_y2 = drone_y + 335;

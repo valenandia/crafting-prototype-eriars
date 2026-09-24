@@ -1,18 +1,18 @@
 /// obj_market - Create Event
 
-// =====================================================
-// MARKET POSITION
-// =====================================================
+market_x = 50;
+market_y = 530;
 
-market_x = 650;
-market_y = 100;
+market_panel_w = 500;
+market_panel_h = 340;
 
 
 // =====================================================
 // WORLDS
 // =====================================================
 
-global.market_worlds = [
+global.market_worlds =
+[
     "FANTASY",
     "CYBERPUNK",
     "STEAMPUNK"
@@ -23,7 +23,8 @@ global.market_worlds = [
 // MATERIALS
 // =====================================================
 
-global.market_materials = [
+global.market_materials =
+[
     "stone",
     "polyester",
     "tree",
@@ -36,15 +37,10 @@ global.market_materials = [
 
 
 // =====================================================
-// MARKET DATA
+// DATA
 // =====================================================
 
 global.market_prices = {};
-
-
-// =====================================================
-// SELECTED WORLD
-// =====================================================
 
 global.selected_market_world = 0;
 
@@ -60,12 +56,7 @@ market_timer =
 
 
 // =====================================================
-// GENERATE FIRST MARKET
-// =====================================================
-
-market_generate_prices();
-// =====================================================
-// MARKET EVENTS
+// EVENTS
 // =====================================================
 
 global.market_event_active = false;
@@ -78,3 +69,13 @@ global.market_event_failure_bonus =
 
 global.market_event_timer =
     0;
+
+global.market_event_duration =
+    0;
+
+
+// =====================================================
+// FIRST MARKET
+// =====================================================
+
+market_generate_prices();

@@ -1,11 +1,37 @@
-if (global.ui_screen != 0) exit;
-
 /// obj_market - Draw GUI Event
+
+if (global.ui_screen != 0)
+{
+    exit;
+}
+
 
 draw_set_font(fnt_ui_small);
 
-var mx = market_x;
-var my = market_y;
+
+var panel_color =
+    make_color_rgb(37,44,56);
+
+var header_color =
+    make_color_rgb(78,92,112);
+
+var muted_color =
+    make_color_rgb(170,180,195);
+
+
+// =====================================================
+// PANEL
+// =====================================================
+
+draw_set_color(panel_color);
+
+draw_rectangle(
+    market_x,
+    market_y,
+    market_x + market_panel_w,
+    market_y + market_panel_h,
+    false
+);
 
 
 // =====================================================
@@ -15,282 +41,251 @@ var my = market_y;
 draw_set_color(c_white);
 
 draw_text(
-    mx,
-    my,
+    market_x + 20,
+    market_y + 17,
     "WORLD MARKET"
 );
 
 
-// =====================================================
-// UPDATE TIMER
-// =====================================================
-
-var update_seconds =
-    ceil(market_timer / room_speed);
-
-draw_set_color(c_gray);
+draw_set_color(muted_color);
 
 draw_text(
-    mx + 160,
-    my,
+    market_x + 360,
+    market_y + 17,
     "UPDATE: "
-    + string(update_seconds)
+    + string(ceil(market_timer / room_speed))
     + "s"
 );
 
 
 // =====================================================
-// HEADERS
+// HEADER
 // =====================================================
 
-draw_set_color(c_gray);
+draw_set_color(header_color);
 
-draw_text(mx,       my + 30, "RESOURCE");
-draw_text(mx + 110, my + 30, "F");
-draw_text(mx + 165, my + 30, "C");
-draw_text(mx + 220, my + 30, "S");
+draw_rectangle(
+    market_x + 20,
+    market_y + 48,
+    market_x + 480,
+    market_y + 78,
+    false
+);
+
+
+draw_set_color(muted_color);
+
+draw_text(market_x + 30,  market_y + 56, "RESOURCE");
+draw_text(market_x + 220, market_y + 56, "FANTASY");
+draw_text(market_x + 310, market_y + 56, "CYBER");
+draw_text(market_x + 390, market_y + 56, "STEAM");
 
 
 // =====================================================
 // MATERIALS
 // =====================================================
 
-for (var i = 0; i < array_length(global.market_materials); i++)
+for (
+    var market_i = 0;
+    market_i < array_length(global.market_materials);
+    market_i++
+)
 {
-    // -------------------------------------------------
-    // CURRENT MATERIAL
-    // -------------------------------------------------
-
-    var tag =
-        global.market_materials[i];
-
-    var material_data =
-        global.materials[$ tag];
-
-    var yy =
-        my + 55 + (i * 27);
+    var market_tag =
+        global.market_materials[market_i];
 
 
-    // -------------------------------------------------
-    // RESOURCE NAME
-    // Цвет берём из Material Pool
-    // -------------------------------------------------
+    var market_row_y =
+        market_y + 92 + market_i * 25;
 
-    draw_set_color(
-        material_data.color
-    );
+
+    switch (market_tag)
+    {
+        case "stone":
+            draw_set_color(make_color_rgb(150,150,150));
+        break;
+
+        case "polyester":
+            draw_set_color(make_color_rgb(255,100,180));
+        break;
+
+        case "tree":
+            draw_set_color(make_color_rgb(80,190,90));
+        break;
+
+        case "cloth":
+            draw_set_color(make_color_rgb(240,210,60));
+        break;
+
+        case "glass":
+            draw_set_color(make_color_rgb(80,210,240));
+        break;
+
+        case "jewels":
+            draw_set_color(make_color_rgb(60,100,255));
+        break;
+
+        case "mushrooms":
+            draw_set_color(make_color_rgb(170,100,35));
+        break;
+
+        case "blood":
+            draw_set_color(make_color_rgb(235,55,55));
+        break;
+    }
+
 
     draw_text(
-        mx,
-        yy,
-        material_data.name
+        market_x + 30,
+        market_row_y,
+        trade_get_resource_name(market_tag)
     );
 
 
-    // -------------------------------------------------
-    // FANTASY
-    // -------------------------------------------------
-
-    var fantasy =
+    var fantasy_value =
         market_get_multiplier(
             "FANTASY",
-            tag
+            market_tag
         );
 
-    if (fantasy >= 1.25)
-    {
-        draw_set_color(c_lime);
-    }
-    else if (fantasy <= 0.80)
-    {
-        draw_set_color(c_red);
-    }
-    else
-    {
-        draw_set_color(c_white);
-    }
-
-    draw_text(
-        mx + 110,
-        yy,
-        string(fantasy)
-    );
-
-
-    // -------------------------------------------------
-    // CYBERPUNK
-    // -------------------------------------------------
-
-    var cyber =
+    var cyber_value =
         market_get_multiplier(
             "CYBERPUNK",
-            tag
+            market_tag
         );
 
-    if (cyber >= 1.25)
-    {
+    var steam_value =
+        market_get_multiplier(
+            "STEAMPUNK",
+            market_tag
+        );
+
+
+    // FANTASY
+
+    if (fantasy_value >= 1.25)
         draw_set_color(c_lime);
-    }
-    else if (cyber <= 0.80)
-    {
+    else if (fantasy_value <= 0.80)
         draw_set_color(c_red);
-    }
     else
-    {
         draw_set_color(c_white);
-    }
+
 
     draw_text(
-        mx + 165,
-        yy,
-        string(cyber)
+        market_x + 230,
+        market_row_y,
+        "x" + string(fantasy_value)
     );
 
 
-    // -------------------------------------------------
-    // STEAMPUNK
-    // -------------------------------------------------
+    // CYBER
 
-    var steam =
-        market_get_multiplier(
-            "STEAMPUNK",
-            tag
-        );
-
-    if (steam >= 1.25)
-    {
+    if (cyber_value >= 1.25)
         draw_set_color(c_lime);
-    }
-    else if (steam <= 0.80)
-    {
+    else if (cyber_value <= 0.80)
         draw_set_color(c_red);
-    }
     else
-    {
         draw_set_color(c_white);
-    }
+
 
     draw_text(
-        mx + 220,
-        yy,
-        string(steam)
+        market_x + 320,
+        market_row_y,
+        "x" + string(cyber_value)
+    );
+
+
+    // STEAM
+
+    if (steam_value >= 1.25)
+        draw_set_color(c_lime);
+    else if (steam_value <= 0.80)
+        draw_set_color(c_red);
+    else
+        draw_set_color(c_white);
+
+
+    draw_text(
+        market_x + 400,
+        market_row_y,
+        "x" + string(steam_value)
     );
 }
 
 
 // =====================================================
-// LEGEND
+// EVENT
 // =====================================================
 
-draw_set_color(c_gray);
+draw_set_color(header_color);
 
-draw_text(
-    mx,
-    my + 285,
-    "F Fantasy   C Cyber   S Steam"
+draw_rectangle(
+    market_x + 20,
+    market_y + 300,
+    market_x + 480,
+    market_y + 328,
+    false
 );
 
-
-// =====================================================
-// MARKET EVENT
-// =====================================================
 
 if (global.market_event_active)
 {
     var event_seconds =
         ceil(
-            global.market_event_timer
-            / room_speed
+            global.market_event_timer /
+            room_speed
         );
 
-    var event_bonus =
-        global.market_event_failure_bonus;
 
-
-    // =================================================
-    // NEGATIVE EVENT
-    // =================================================
-
-    if (event_bonus > 0)
-    {
+    if (global.market_event_failure_bonus > 0)
         draw_set_color(c_red);
-
-        draw_text(
-            mx,
-            my + 305,
-            "EVENT: "
-            + global.market_event_name
-        );
-
-
-        draw_set_color(c_yellow);
-
-        draw_text(
-            mx,
-            my + 325,
-            "FAILURE: +"
-            + string(event_bonus)
-            + "%"
-        );
-    }
-
-
-    // =================================================
-    // POSITIVE EVENT
-    // =================================================
-
-    else if (event_bonus < 0)
-    {
+    else
         draw_set_color(c_lime);
 
-        draw_text(
-            mx,
-            my + 305,
-            "EVENT: "
-            + global.market_event_name
-        );
-
-
-        draw_set_color(c_lime);
-
-        draw_text(
-            mx,
-            my + 325,
-            "FAILURE: "
-            + string(event_bonus)
-            + "%"
-        );
-    }
-
-
-    // =================================================
-    // TIMER
-    // =================================================
-
-    draw_set_color(c_gray);
 
     draw_text(
-        mx,
-        my + 345,
-        "ENDS: "
-        + string(event_seconds)
-        + "s"
+        market_x + 30,
+        market_y + 307,
+        "EVENT: "
+        + global.market_event_name
     );
+
+
+    if (global.market_event_failure_bonus > 0)
+    {
+        draw_text(
+            market_x + 330,
+            market_y + 307,
+            "+"
+            + string(global.market_event_failure_bonus)
+            + "% / "
+            + string(event_seconds)
+            + "s"
+        );
+    }
+    else
+    {
+        draw_text(
+            market_x + 330,
+            market_y + 307,
+            string(global.market_event_failure_bonus)
+            + "% / "
+            + string(event_seconds)
+            + "s"
+        );
+    }
 }
 else
 {
-    draw_set_color(c_gray);
+    draw_set_color(muted_color);
 
     draw_text(
-        mx,
-        my + 305,
+        market_x + 30,
+        market_y + 307,
         "EVENT: NONE"
     );
 }
 
-// =====================================================
-// RESET
-// =====================================================
 
 draw_set_font(-1);
 draw_set_color(c_white);

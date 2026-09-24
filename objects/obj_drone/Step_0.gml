@@ -1,198 +1,166 @@
 /// obj_drone - Step Event
 
-var mx = device_mouse_x_to_gui(0);
-var my = device_mouse_y_to_gui(0);
+var mouse_gui_x =
+    device_mouse_x_to_gui(0);
+
+var mouse_gui_y =
+    device_mouse_y_to_gui(0);
 
 
 // =====================================================
-// DRONE A - START
+// INPUT
 // =====================================================
 
-if (!drone_a_active)
+if (global.ui_screen == 0)
 {
     if (mouse_check_button_pressed(mb_left))
     {
-        if (
-            mx >= drone_a_button_x1 &&
-            mx <= drone_a_button_x2 &&
-            my >= drone_a_button_y1 &&
-            my <= drone_a_button_y2
-        )
+        // =============================================
+        // DRONE A
+        // =============================================
+
+        if (!drone_a_active)
         {
-            drone_a_active = true;
+            if (
+                mouse_gui_x >= drone_a_button_x1 &&
+                mouse_gui_x <= drone_a_button_x2 &&
+                mouse_gui_y >= drone_a_button_y1 &&
+                mouse_gui_y <= drone_a_button_y2
+            )
+            {
+                drone_a_active = true;
 
-            drone_a_time =
-                drone_a_duration * room_speed;
+                drone_a_time =
+                    drone_a_duration * room_speed;
 
-            drone_a_result =
-                "Searching...";
+                drone_a_result =
+                    "Searching...";
+            }
+        }
+
+
+        // =============================================
+        // DRONE B
+        // =============================================
+
+        if (!drone_b_active)
+        {
+            if (
+                mouse_gui_x >= drone_b_button_x1 &&
+                mouse_gui_x <= drone_b_button_x2 &&
+                mouse_gui_y >= drone_b_button_y1 &&
+                mouse_gui_y <= drone_b_button_y2
+            )
+            {
+                drone_b_active = true;
+
+                drone_b_time =
+                    drone_b_duration * room_speed;
+
+                drone_b_result =
+                    "Searching...";
+            }
+        }
+
+
+        // =============================================
+        // SCOUT
+        // =============================================
+
+        if (!scout_active)
+        {
+            if (
+                mouse_gui_x >= scout_button_x1 &&
+                mouse_gui_x <= scout_button_x2 &&
+                mouse_gui_y >= scout_button_y1 &&
+                mouse_gui_y <= scout_button_y2
+            )
+            {
+                var lowest_tag =
+                    "stone";
+
+                var lowest_amount =
+                    global.material_pool.stone;
+
+
+                if (global.material_pool.polyester < lowest_amount)
+                {
+                    lowest_tag = "polyester";
+                    lowest_amount = global.material_pool.polyester;
+                }
+
+                if (global.material_pool.tree < lowest_amount)
+                {
+                    lowest_tag = "tree";
+                    lowest_amount = global.material_pool.tree;
+                }
+
+                if (global.material_pool.cloth < lowest_amount)
+                {
+                    lowest_tag = "cloth";
+                    lowest_amount = global.material_pool.cloth;
+                }
+
+                if (global.material_pool.glass < lowest_amount)
+                {
+                    lowest_tag = "glass";
+                    lowest_amount = global.material_pool.glass;
+                }
+
+                if (global.material_pool.jewels < lowest_amount)
+                {
+                    lowest_tag = "jewels";
+                    lowest_amount = global.material_pool.jewels;
+                }
+
+
+                scout_target_tag =
+                    lowest_tag;
+
+
+                switch (lowest_tag)
+                {
+                    case "stone":
+                        scout_target_name = "Stone";
+                    break;
+
+                    case "polyester":
+                        scout_target_name = "Polyester";
+                    break;
+
+                    case "tree":
+                        scout_target_name = "Tree";
+                    break;
+
+                    case "cloth":
+                        scout_target_name = "Cloth";
+                    break;
+
+                    case "glass":
+                        scout_target_name = "Glass";
+                    break;
+
+                    case "jewels":
+                        scout_target_name = "Jewels";
+                    break;
+                }
+
+
+                scout_active = true;
+
+                scout_time =
+                    scout_duration * room_speed;
+
+                scout_result =
+                    "TARGET: " + scout_target_name;
+            }
         }
     }
 }
 
 
 // =====================================================
-// DRONE B - START
-// =====================================================
-
-if (!drone_b_active)
-{
-    if (mouse_check_button_pressed(mb_left))
-    {
-        if (
-            mx >= drone_b_button_x1 &&
-            mx <= drone_b_button_x2 &&
-            my >= drone_b_button_y1 &&
-            my <= drone_b_button_y2
-        )
-        {
-            drone_b_active = true;
-
-            drone_b_time =
-                drone_b_duration * room_speed;
-
-            drone_b_result =
-                "Searching...";
-        }
-    }
-}
-
-
-// =====================================================
-// SCOUT - START
-// =====================================================
-
-if (!scout_active)
-{
-    if (mouse_check_button_pressed(mb_left))
-    {
-        if (
-            mx >= scout_button_x1 &&
-            mx <= scout_button_x2 &&
-            my >= scout_button_y1 &&
-            my <= scout_button_y2
-        )
-        {
-            // -----------------------------------------
-            // Find lowest NORMAL resource
-            // -----------------------------------------
-
-            var lowest_tag = "stone";
-            var lowest_amount =
-                global.material_pool[$ "stone"];
-
-
-            if (
-                global.material_pool[$ "polyester"]
-                < lowest_amount
-            )
-            {
-                lowest_tag = "polyester";
-
-                lowest_amount =
-                    global.material_pool[$ "polyester"];
-            }
-
-
-            if (
-                global.material_pool[$ "tree"]
-                < lowest_amount
-            )
-            {
-                lowest_tag = "tree";
-
-                lowest_amount =
-                    global.material_pool[$ "tree"];
-            }
-
-
-            if (
-                global.material_pool[$ "cloth"]
-                < lowest_amount
-            )
-            {
-                lowest_tag = "cloth";
-
-                lowest_amount =
-                    global.material_pool[$ "cloth"];
-            }
-
-
-            if (
-                global.material_pool[$ "glass"]
-                < lowest_amount
-            )
-            {
-                lowest_tag = "glass";
-
-                lowest_amount =
-                    global.material_pool[$ "glass"];
-            }
-
-
-            if (
-                global.material_pool[$ "jewels"]
-                < lowest_amount
-            )
-            {
-                lowest_tag = "jewels";
-
-                lowest_amount =
-                    global.material_pool[$ "jewels"];
-            }
-
-
-            // -----------------------------------------
-            // Save target
-            // -----------------------------------------
-
-            scout_target_tag =
-                lowest_tag;
-
-
-            switch (lowest_tag)
-            {
-                case "stone":
-                    scout_target_name = "Stone";
-                break;
-
-                case "polyester":
-                    scout_target_name = "Polyester";
-                break;
-
-                case "tree":
-                    scout_target_name = "Tree";
-                break;
-
-                case "cloth":
-                    scout_target_name = "Cloth";
-                break;
-
-                case "glass":
-                    scout_target_name = "Glass";
-                break;
-
-                case "jewels":
-                    scout_target_name = "Jewels";
-                break;
-            }
-
-
-            scout_active = true;
-
-            scout_time =
-                scout_duration * room_speed;
-
-            scout_result =
-                "TARGET: "
-                + scout_target_name;
-        }
-    }
-}
-
-
-// =====================================================
-// DRONE A - SEARCH
+// DRONE A TIMER
 // =====================================================
 
 if (drone_a_active)
@@ -207,7 +175,6 @@ if (drone_a_active)
 
         var roll_a =
             random(97);
-
 
         var found_tag_a = "";
         var found_name_a = "";
@@ -249,8 +216,32 @@ if (drone_a_active)
             irandom_range(20, 60);
 
 
-        global.material_pool[$ found_tag_a] +=
-            found_amount_a;
+        switch (found_tag_a)
+        {
+            case "stone":
+                global.material_pool.stone += found_amount_a;
+            break;
+
+            case "polyester":
+                global.material_pool.polyester += found_amount_a;
+            break;
+
+            case "tree":
+                global.material_pool.tree += found_amount_a;
+            break;
+
+            case "cloth":
+                global.material_pool.cloth += found_amount_a;
+            break;
+
+            case "glass":
+                global.material_pool.glass += found_amount_a;
+            break;
+
+            case "jewels":
+                global.material_pool.jewels += found_amount_a;
+            break;
+        }
 
 
         drone_a_result =
@@ -263,7 +254,7 @@ if (drone_a_active)
 
 
 // =====================================================
-// DRONE B - SEARCH
+// DRONE B TIMER
 // =====================================================
 
 if (drone_b_active)
@@ -278,7 +269,6 @@ if (drone_b_active)
 
         var roll_b =
             random(97);
-
 
         var found_tag_b = "";
         var found_name_b = "";
@@ -320,8 +310,32 @@ if (drone_b_active)
             irandom_range(35, 75);
 
 
-        global.material_pool[$ found_tag_b] +=
-            found_amount_b;
+        switch (found_tag_b)
+        {
+            case "stone":
+                global.material_pool.stone += found_amount_b;
+            break;
+
+            case "polyester":
+                global.material_pool.polyester += found_amount_b;
+            break;
+
+            case "tree":
+                global.material_pool.tree += found_amount_b;
+            break;
+
+            case "cloth":
+                global.material_pool.cloth += found_amount_b;
+            break;
+
+            case "glass":
+                global.material_pool.glass += found_amount_b;
+            break;
+
+            case "jewels":
+                global.material_pool.jewels += found_amount_b;
+            break;
+        }
 
 
         drone_b_result =
@@ -334,7 +348,7 @@ if (drone_b_active)
 
 
 // =====================================================
-// SCOUT - SEARCH
+// SCOUT TIMER
 // =====================================================
 
 if (scout_active)
@@ -347,8 +361,32 @@ if (scout_active)
         scout_active = false;
 
 
-        global.material_pool[$ scout_target_tag] +=
-            scout_reward;
+        switch (scout_target_tag)
+        {
+            case "stone":
+                global.material_pool.stone += scout_reward;
+            break;
+
+            case "polyester":
+                global.material_pool.polyester += scout_reward;
+            break;
+
+            case "tree":
+                global.material_pool.tree += scout_reward;
+            break;
+
+            case "cloth":
+                global.material_pool.cloth += scout_reward;
+            break;
+
+            case "glass":
+                global.material_pool.glass += scout_reward;
+            break;
+
+            case "jewels":
+                global.material_pool.jewels += scout_reward;
+            break;
+        }
 
 
         scout_result =
