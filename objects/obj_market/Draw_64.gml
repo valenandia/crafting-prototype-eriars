@@ -1,3 +1,5 @@
+if (global.ui_screen != 0) exit;
+
 /// obj_market - Draw GUI Event
 
 draw_set_font(fnt_ui_small);

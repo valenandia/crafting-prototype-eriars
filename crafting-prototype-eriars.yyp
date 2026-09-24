@@ -27,6 +27,7 @@
     {"id":{"name":"obj_game","path":"objects/obj_game/obj_game.yy",},},
     {"id":{"name":"obj_market","path":"objects/obj_market/obj_market.yy",},},
     {"id":{"name":"obj_material_pool","path":"objects/obj_material_pool/obj_material_pool.yy",},},
+    {"id":{"name":"obj_minigame_ui","path":"objects/obj_minigame_ui/obj_minigame_ui.yy",},},
     {"id":{"name":"obj_quest","path":"objects/obj_quest/obj_quest.yy",},},
     {"id":{"name":"obj_sell","path":"objects/obj_sell/obj_sell.yy",},},
     {"id":{"name":"obj_tabs","path":"objects/obj_tabs/obj_tabs.yy",},},

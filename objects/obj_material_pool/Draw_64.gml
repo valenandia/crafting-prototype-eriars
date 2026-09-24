@@ -1,3 +1,5 @@
+if (global.ui_screen != 0) exit;
+
 draw_set_font(fnt_ui_small);
 /// obj_material_pool - Draw Event
 

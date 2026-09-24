@@ -78,10 +78,9 @@ global.craft_attempts = 0;
 
 global.credits = 1000;
 // =====================================================
-// UI TABS
+// UI SCREENS
 // =====================================================
 
-
-// 0 = CRAFTING
-// 1 = MARKET
-// 2 = RESOURCES
+// 0 = ECONOMY
+// 1 = CRAFTING MINI-GAME
+global.ui_screen = 0;

@@ -1,3 +1,5 @@
+if (global.ui_screen != 0) exit;
+
 /// obj_ui - Draw GUI Event
 
 
