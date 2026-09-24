@@ -1,9 +1,46 @@
 /// obj_trade - Draw GUI Event
 
+if (global.ui_screen != 0)
+{
+    exit;
+}
+
+
 draw_set_font(fnt_ui_small);
 
-var tx = trade_x;
-var ty = trade_y;
+
+var panel_color =
+    make_color_rgb(37, 44, 56);
+
+var row_color =
+    make_color_rgb(70, 84, 103);
+
+var header_color =
+    make_color_rgb(78, 92, 112);
+
+var purple_color =
+    make_color_rgb(124, 86, 170);
+
+var disabled_color =
+    make_color_rgb(70, 75, 85);
+
+var muted_color =
+    make_color_rgb(170, 180, 195);
+
+
+// =====================================================
+// PANEL
+// =====================================================
+
+draw_set_color(panel_color);
+
+draw_rectangle(
+    trade_x,
+    trade_y,
+    trade_x + trade_panel_w,
+    trade_y + trade_panel_h,
+    false
+);
 
 
 // =====================================================
@@ -13,53 +50,60 @@ var ty = trade_y;
 draw_set_color(c_white);
 
 draw_text(
-    tx,
-    ty,
-    "TRADE"
+    trade_x + 20,
+    trade_y + 17,
+    "RESOURCE TRADE"
 );
 
-
-// =====================================================
-// CREDITS
-// =====================================================
 
 draw_set_color(c_yellow);
 
 draw_text(
-    tx,
-    ty + 25,
+    trade_x + 365,
+    trade_y + 17,
     "CREDITS: "
     + string(global.credits)
 );
 
 
 // =====================================================
-// HEADERS
+// HEADER
 // =====================================================
 
-draw_set_color(c_gray);
+draw_set_color(header_color);
+
+draw_rectangle(
+    trade_x + 20,
+    trade_y + 50,
+    trade_x + 530,
+    trade_y + 80,
+    false
+);
+
+
+draw_set_color(muted_color);
 
 draw_text(
-    tx,
-    ty + 55,
+    trade_x + 30,
+    trade_y + 58,
     "RESOURCE"
 );
 
 draw_text(
-    tx + 80,
-    ty + 55,
+    trade_x + 145,
+    trade_y + 58,
     "OWNED"
 );
 
 draw_text(
-    tx + 130,
-    ty + 55,
+    trade_x + 210,
+    trade_y + 58,
     "BUY"
 );
 
 draw_text(
-    tx + 300,
-    ty + 55,
+    trade_x + 385,
+    trade_y + 58,
     "SELL"
 );
 
@@ -69,114 +113,173 @@ draw_text(
 // =====================================================
 
 for (
-    var i = 0;
-    i < array_length(trade_resources);
-    i++
+    var trade_i = 0;
+    trade_i < array_length(trade_resources);
+    trade_i++
 )
 {
-    var tag =
-        trade_resources[i];
+    var trade_tag =
+        trade_resources[trade_i];
 
-    var resource_name =
-        trade_get_resource_name(tag);
-
-    var owned =
-        global.material_pool[$ tag];
+    var trade_row_y =
+        trade_y + 93 + trade_i * 30;
 
 
     // =================================================
-    // BUY DATA
-    // =====================================================
-
-    var buy_world =
-        trade_get_cheapest_world(tag);
-
-    var buy_price =
-        trade_get_buy_price(tag);
-
-
+    // OWNED
     // =================================================
-    // SELL DATA
-    // =====================================================
 
-    var sell_world =
-        trade_get_best_sell_world(tag);
-
-    var sell_price =
-        trade_get_sell_price(tag);
+    var owned_amount = 0;
 
 
-    var yy =
-        ty + 80 + (i * 27);
-
-
-    // =================================================
-    // RESOURCE COLOR
-    // =====================================================
-
-    switch (tag)
+    switch (trade_tag)
     {
         case "stone":
-            draw_set_color(c_gray);
+            owned_amount = global.material_pool.stone;
         break;
 
         case "polyester":
-            draw_set_color(c_fuchsia);
+            owned_amount = global.material_pool.polyester;
         break;
 
         case "tree":
-            draw_set_color(c_lime);
+            owned_amount = global.material_pool.tree;
         break;
 
         case "cloth":
-            draw_set_color(c_yellow);
+            owned_amount = global.material_pool.cloth;
         break;
 
         case "glass":
-            draw_set_color(c_aqua);
+            owned_amount = global.material_pool.glass;
         break;
 
         case "jewels":
-            draw_set_color(c_blue);
+            owned_amount = global.material_pool.jewels;
         break;
 
         case "mushrooms":
-            draw_set_color(
-                make_color_rgb(150, 90, 30)
-            );
+            owned_amount = global.material_pool.mushrooms;
         break;
 
         case "blood":
-            draw_set_color(c_red);
+            owned_amount = global.material_pool.blood;
         break;
     }
 
 
+    // =================================================
+    // ROW BACKGROUND
+    // =================================================
+
+    draw_set_color(row_color);
+
+    draw_rectangle(
+        trade_x + 20,
+        trade_row_y - 5,
+        trade_x + 530,
+        trade_row_y + 22,
+        false
+    );
+
+
+    // =================================================
+    // COLOR BAR + NAME
+    // =================================================
+
+    switch (trade_tag)
+    {
+        case "stone":
+            draw_set_color(
+                make_color_rgb(150,150,150)
+            );
+        break;
+
+        case "polyester":
+            draw_set_color(
+                make_color_rgb(255,100,180)
+            );
+        break;
+
+        case "tree":
+            draw_set_color(
+                make_color_rgb(80,190,90)
+            );
+        break;
+
+        case "cloth":
+            draw_set_color(
+                make_color_rgb(240,210,60)
+            );
+        break;
+
+        case "glass":
+            draw_set_color(
+                make_color_rgb(80,210,240)
+            );
+        break;
+
+        case "jewels":
+            draw_set_color(
+                make_color_rgb(60,100,255)
+            );
+        break;
+
+        case "mushrooms":
+            draw_set_color(
+                make_color_rgb(170,100,35)
+            );
+        break;
+
+        case "blood":
+            draw_set_color(
+                make_color_rgb(235,55,55)
+            );
+        break;
+    }
+
+
+    draw_rectangle(
+        trade_x + 20,
+        trade_row_y - 5,
+        trade_x + 26,
+        trade_row_y + 22,
+        false
+    );
+
+
     draw_text(
-        tx,
-        yy,
-        resource_name
+        trade_x + 35,
+        trade_row_y,
+        trade_get_resource_name(trade_tag)
     );
 
 
     // =================================================
     // OWNED
-    // =====================================================
+    // =================================================
 
     draw_set_color(c_white);
 
     draw_text(
-        tx + 80,
-        yy,
-        string(owned)
+        trade_x + 150,
+        trade_row_y,
+        string(owned_amount)
     );
 
 
     // =================================================
-    // BUY WORLD SHORT NAME
-    // =====================================================
+    // BUY DATA
+    // =================================================
 
-    var buy_short = "";
+    var buy_world =
+        trade_get_cheapest_world(trade_tag);
+
+    var buy_price =
+        trade_get_buy_price(trade_tag);
+
+    var buy_short =
+        "";
 
     switch (buy_world)
     {
@@ -194,82 +297,70 @@ for (
     }
 
 
-    // =================================================
     // BUY WORLD
-    // =====================================================
 
     draw_set_color(c_white);
 
     draw_text(
-        tx + 130,
-        yy,
+        trade_x + 210,
+        trade_row_y,
         buy_short
     );
 
 
-    // =================================================
     // BUY PRICE
-    // =====================================================
 
     draw_set_color(c_yellow);
 
     draw_text(
-        tx + 165,
-        yy,
+        trade_x + 250,
+        trade_row_y,
         string(buy_price)
     );
 
 
-    // =================================================
     // BUY BUTTON
-    // =====================================================
-
-    var buy_x1 =
-        tx + 195;
-
-    var buy_y1 =
-        yy - 5;
-
-    var buy_x2 =
-        buy_x1 + button_w;
-
-    var buy_y2 =
-        buy_y1 + button_h;
-
 
     if (global.credits >= buy_price)
     {
-        draw_set_color(c_white);
+        draw_set_color(purple_color);
     }
     else
     {
-        draw_set_color(c_gray);
+        draw_set_color(disabled_color);
     }
 
 
     draw_rectangle(
-        buy_x1,
-        buy_y1,
-        buy_x2,
-        buy_y2,
+        trade_x + 290,
+        trade_row_y - 5,
+        trade_x + 344,
+        trade_row_y + 20,
         false
     );
 
 
-    draw_set_color(c_black);
+    draw_set_color(c_white);
 
     draw_text(
-        buy_x1 + 10,
-        buy_y1 + 6,
+        trade_x + 304,
+        trade_row_y,
         "BUY"
     );
 
 
     // =================================================
-    // SELL WORLD SHORT NAME
-    // =====================================================
+    // SELL DATA
+    // =================================================
 
-    var sell_short = "";
+    var sell_world =
+        trade_get_best_sell_world(trade_tag);
+
+    var sell_price =
+        trade_get_sell_price(trade_tag);
+
+    var sell_short =
+        "";
 
     switch (sell_world)
     {
@@ -287,100 +378,77 @@ for (
     }
 
 
-    // =================================================
     // SELL WORLD
-    // =====================================================
 
     draw_set_color(c_white);
 
     draw_text(
-        tx + 300,
-        yy,
+        trade_x + 385,
+        trade_row_y,
         sell_short
     );
 
 
-    // =================================================
     // SELL PRICE
-    // =====================================================
 
     draw_set_color(c_lime);
 
     draw_text(
-        tx + 335,
-        yy,
+        trade_x + 425,
+        trade_row_y,
         string(sell_price)
     );
 
 
-    // =================================================
     // SELL BUTTON
-    // =====================================================
 
-    var sell_x1 =
-        tx + 365;
-
-    var sell_y1 =
-        yy - 5;
-
-    var sell_x2 =
-        sell_x1 + button_w;
-
-    var sell_y2 =
-        sell_y1 + button_h;
-
-
-    if (owned >= trade_amount)
+    if (owned_amount >= trade_amount)
     {
-        draw_set_color(c_white);
+        draw_set_color(purple_color);
     }
     else
     {
-        draw_set_color(c_gray);
+        draw_set_color(disabled_color);
     }
 
 
     draw_rectangle(
-        sell_x1,
-        sell_y1,
-        sell_x2,
-        sell_y2,
+        trade_x + 470,
+        trade_row_y - 5,
+        trade_x + 524,
+        trade_row_y + 20,
         false
     );
 
 
-    draw_set_color(c_black);
+    draw_set_color(c_white);
 
     draw_text(
-        sell_x1 + 5,
-        sell_y1 + 6,
+        trade_x + 480,
+        trade_row_y,
         "SELL"
     );
 }
 
 
 // =====================================================
-// INFO
+// FOOTER
 // =====================================================
 
-draw_set_color(c_gray);
+draw_set_color(muted_color);
 
 draw_text(
-    tx,
-    ty + 305,
-    "BUY cheapest / SELL highest / 100 units"
+    trade_x + 20,
+    trade_y + 338,
+    "BUY CHEAPEST / SELL HIGHEST / 100 UNITS"
 );
 
-
-// =====================================================
-// RESULT
-// =====================================================
 
 draw_set_color(c_white);
 
 draw_text(
-    tx,
-    ty + 330,
+    trade_x + 20,
+    trade_y + 356,
     trade_result
 );
 
@@ -391,3 +459,4 @@ draw_text(
 
 draw_set_font(-1);
 draw_set_color(c_white);
+draw_set_alpha(1);

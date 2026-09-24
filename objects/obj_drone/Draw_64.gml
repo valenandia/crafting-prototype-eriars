@@ -1,20 +1,50 @@
 /// obj_drone - Draw GUI Event
 
+if (global.ui_screen != 0)
+{
+    exit;
+}
+
+
 draw_set_font(fnt_ui_small);
 
-var dx = drone_x;
-var dy = drone_y;
+
+var panel_color =
+    make_color_rgb(37,44,56);
+
+var card_color =
+    make_color_rgb(70,84,103);
+
+var purple_color =
+    make_color_rgb(124,86,170);
+
+var muted_color =
+    make_color_rgb(170,180,195);
+
+var green_color =
+    make_color_rgb(100,220,140);
 
 
 // =====================================================
-// TITLE
+// PANEL
 // =====================================================
+
+draw_set_color(panel_color);
+
+draw_rectangle(
+    drone_x,
+    drone_y,
+    drone_x + drone_panel_w,
+    drone_y + drone_panel_h,
+    false
+);
+
 
 draw_set_color(c_white);
 
 draw_text(
-    dx,
-    dy,
+    drone_x + 20,
+    drone_y + 17,
     "DRONES"
 );
 
@@ -23,50 +53,70 @@ draw_text(
 // DRONE A
 // =====================================================
 
+draw_set_color(card_color);
+
+draw_rectangle(
+    drone_x + 20,
+    drone_y + 52,
+    drone_x + 430,
+    drone_y + 135,
+    false
+);
+
+
 draw_set_color(c_white);
 
 draw_text(
-    dx,
-    dy + 30,
+    drone_x + 35,
+    drone_y + 66,
     "DRONE A"
+);
+
+
+draw_set_color(muted_color);
+
+draw_text(
+    drone_x + 35,
+    drone_y + 89,
+    "10s / +20..60 NORMAL RESOURCE"
 );
 
 
 if (drone_a_active)
 {
-    var seconds_a =
-        ceil(drone_a_time / room_speed);
-
     draw_set_color(c_yellow);
 
     draw_text(
-        dx + 70,
-        dy + 30,
-        string(seconds_a) + "s"
+        drone_x + 315,
+        drone_y + 66,
+        string(ceil(drone_a_time / room_speed)) + "s"
     );
 }
 else
 {
-    draw_set_color(c_lime);
+    draw_set_color(green_color);
 
     draw_text(
-        dx + 70,
-        dy + 30,
+        drone_x + 315,
+        drone_y + 66,
         "READY"
     );
 }
 
 
-// BUTTON
+draw_set_color(muted_color);
+
+draw_text(
+    drone_x + 35,
+    drone_y + 112,
+    drone_a_result
+);
+
 
 if (drone_a_active)
-{
-    draw_set_color(c_gray);
-}
+    draw_set_color(make_color_rgb(70,75,85));
 else
-{
-    draw_set_color(c_white);
-}
+    draw_set_color(purple_color);
 
 
 draw_rectangle(
@@ -78,29 +128,12 @@ draw_rectangle(
 );
 
 
-if (drone_a_active)
-{
-    draw_set_color(c_dkgray);
-}
-else
-{
-    draw_set_color(c_black);
-}
-
+draw_set_color(c_white);
 
 draw_text(
-    drone_a_button_x1 + 55,
-    drone_a_button_y1 + 8,
+    drone_a_button_x1 + 39,
+    drone_a_button_y1 + 9,
     "SEND"
-);
-
-
-draw_set_color(c_gray);
-
-draw_text(
-    dx,
-    dy + 105,
-    drone_a_result
 );
 
 
@@ -108,50 +141,70 @@ draw_text(
 // DRONE B
 // =====================================================
 
+draw_set_color(card_color);
+
+draw_rectangle(
+    drone_x + 20,
+    drone_y + 152,
+    drone_x + 430,
+    drone_y + 235,
+    false
+);
+
+
 draw_set_color(c_white);
 
 draw_text(
-    dx,
-    dy + 135,
+    drone_x + 35,
+    drone_y + 166,
     "DRONE B"
+);
+
+
+draw_set_color(muted_color);
+
+draw_text(
+    drone_x + 35,
+    drone_y + 189,
+    "15s / +35..75 NORMAL RESOURCE"
 );
 
 
 if (drone_b_active)
 {
-    var seconds_b =
-        ceil(drone_b_time / room_speed);
-
     draw_set_color(c_yellow);
 
     draw_text(
-        dx + 70,
-        dy + 135,
-        string(seconds_b) + "s"
+        drone_x + 315,
+        drone_y + 166,
+        string(ceil(drone_b_time / room_speed)) + "s"
     );
 }
 else
 {
-    draw_set_color(c_lime);
+    draw_set_color(green_color);
 
     draw_text(
-        dx + 70,
-        dy + 135,
+        drone_x + 315,
+        drone_y + 166,
         "READY"
     );
 }
 
 
-// BUTTON
+draw_set_color(muted_color);
+
+draw_text(
+    drone_x + 35,
+    drone_y + 212,
+    drone_b_result
+);
+
 
 if (drone_b_active)
-{
-    draw_set_color(c_gray);
-}
+    draw_set_color(make_color_rgb(70,75,85));
 else
-{
-    draw_set_color(c_white);
-}
+    draw_set_color(purple_color);
 
 
 draw_rectangle(
@@ -163,29 +216,12 @@ draw_rectangle(
 );
 
 
-if (drone_b_active)
-{
-    draw_set_color(c_dkgray);
-}
-else
-{
-    draw_set_color(c_black);
-}
-
+draw_set_color(c_white);
 
 draw_text(
-    drone_b_button_x1 + 55,
-    drone_b_button_y1 + 8,
+    drone_b_button_x1 + 39,
+    drone_b_button_y1 + 9,
     "SEND"
-);
-
-
-draw_set_color(c_gray);
-
-draw_text(
-    dx,
-    dy + 210,
-    drone_b_result
 );
 
 
@@ -193,92 +229,80 @@ draw_text(
 // SCOUT
 // =====================================================
 
+draw_set_color(card_color);
+
+draw_rectangle(
+    drone_x + 20,
+    drone_y + 252,
+    drone_x + 430,
+    drone_y + 350,
+    false
+);
+
+
 draw_set_color(c_aqua);
 
 draw_text(
-    dx,
-    dy + 240,
+    drone_x + 35,
+    drone_y + 266,
     "SCOUT [LOW]"
 );
 
 
-// -----------------------------------------
-// Current lowest resource preview
-// -----------------------------------------
+draw_set_color(muted_color);
+
+draw_text(
+    drone_x + 35,
+    drone_y + 289,
+    "25s / +50 LOWEST NORMAL RESOURCE"
+);
+
 
 if (!scout_active)
 {
-    var preview_tag = "stone";
-    var preview_amount =
-        global.material_pool[$ "stone"];
-
-
-    if (
-        global.material_pool[$ "polyester"]
-        < preview_amount
-    )
-    {
-        preview_tag = "polyester";
-        preview_amount =
-            global.material_pool[$ "polyester"];
-    }
-
-
-    if (
-        global.material_pool[$ "tree"]
-        < preview_amount
-    )
-    {
-        preview_tag = "tree";
-        preview_amount =
-            global.material_pool[$ "tree"];
-    }
-
-
-    if (
-        global.material_pool[$ "cloth"]
-        < preview_amount
-    )
-    {
-        preview_tag = "cloth";
-        preview_amount =
-            global.material_pool[$ "cloth"];
-    }
-
-
-    if (
-        global.material_pool[$ "glass"]
-        < preview_amount
-    )
-    {
-        preview_tag = "glass";
-        preview_amount =
-            global.material_pool[$ "glass"];
-    }
-
-
-    if (
-        global.material_pool[$ "jewels"]
-        < preview_amount
-    )
-    {
-        preview_tag = "jewels";
-        preview_amount =
-            global.material_pool[$ "jewels"];
-    }
-
-
     var preview_name =
-        trade_get_resource_name(
-            preview_tag
-        );
+        "Stone";
+
+    var preview_amount =
+        global.material_pool.stone;
+
+
+    if (global.material_pool.polyester < preview_amount)
+    {
+        preview_name = "Polyester";
+        preview_amount = global.material_pool.polyester;
+    }
+
+    if (global.material_pool.tree < preview_amount)
+    {
+        preview_name = "Tree";
+        preview_amount = global.material_pool.tree;
+    }
+
+    if (global.material_pool.cloth < preview_amount)
+    {
+        preview_name = "Cloth";
+        preview_amount = global.material_pool.cloth;
+    }
+
+    if (global.material_pool.glass < preview_amount)
+    {
+        preview_name = "Glass";
+        preview_amount = global.material_pool.glass;
+    }
+
+    if (global.material_pool.jewels < preview_amount)
+    {
+        preview_name = "Jewels";
+        preview_amount = global.material_pool.jewels;
+    }
 
 
     draw_set_color(c_yellow);
 
     draw_text(
-        dx,
-        dy + 265,
+        drone_x + 35,
+        drone_y + 314,
         "LOW: "
         + preview_name
         + " ("
@@ -288,35 +312,23 @@ if (!scout_active)
 }
 else
 {
-    var scout_seconds =
-        ceil(scout_time / room_speed);
-
-
     draw_set_color(c_yellow);
 
     draw_text(
-        dx,
-        dy + 265,
+        drone_x + 35,
+        drone_y + 314,
         scout_target_name
         + " / "
-        + string(scout_seconds)
+        + string(ceil(scout_time / room_speed))
         + "s"
     );
 }
 
 
-// =====================================================
-// SCOUT BUTTON
-// =====================================================
-
 if (scout_active)
-{
-    draw_set_color(c_gray);
-}
+    draw_set_color(make_color_rgb(70,75,85));
 else
-{
-    draw_set_color(c_white);
-}
+    draw_set_color(purple_color);
 
 
 draw_rectangle(
@@ -328,39 +340,15 @@ draw_rectangle(
 );
 
 
-if (scout_active)
-{
-    draw_set_color(c_dkgray);
-}
-else
-{
-    draw_set_color(c_black);
-}
-
+draw_set_color(c_white);
 
 draw_text(
-    scout_button_x1 + 48,
-    scout_button_y1 + 8,
+    scout_button_x1 + 22,
+    scout_button_y1 + 9,
     "FIND LOW"
 );
 
 
-// =====================================================
-// SCOUT RESULT
-// =====================================================
-
-draw_set_color(c_gray);
-
-draw_text(
-    dx,
-    dy + 325,
-    scout_result
-);
-
-
-// =====================================================
-// RESET
-// =====================================================
-
 draw_set_font(-1);
 draw_set_color(c_white);
+draw_set_alpha(1);

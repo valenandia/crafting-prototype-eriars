@@ -1,93 +1,99 @@
 /// obj_game - Step Event
 
 
-// ---------------------------------
-// Previous recipe
-// ---------------------------------
+var mouse_gui_x =
+    device_mouse_x_to_gui(0);
 
-if (keyboard_check_pressed(vk_left))
+var mouse_gui_y =
+    device_mouse_y_to_gui(0);
+
+
+// =====================================================
+// TAB GEOMETRY
+// Должно совпадать с Draw GUI End
+// =====================================================
+
+var tab_width =
+    150;
+
+var tab_height =
+    38;
+
+var tab_gap =
+    12;
+
+
+var total_width =
+    tab_width * 2
+    + tab_gap;
+
+
+var economy_x =
+    (1600 - total_width) * 0.5;
+
+
+var crafting_x =
+    economy_x
+    + tab_width
+    + tab_gap;
+
+
+var tab_y =
+    18;
+
+
+// =====================================================
+// CLICK
+// =====================================================
+
+if (mouse_check_button_pressed(mb_left))
 {
-    global.selected_recipe--;
+    // =================================================
+    // ECONOMY
+    // =================================================
 
-    if (global.selected_recipe < 0)
+    if (
+        mouse_gui_x >= economy_x &&
+        mouse_gui_x <= economy_x + tab_width &&
+        mouse_gui_y >= tab_y &&
+        mouse_gui_y <= tab_y + tab_height
+    )
     {
-        global.selected_recipe =
-            array_length(global.recipes) - 1;
+        global.ui_screen =
+            0;
+    }
+
+
+    // =================================================
+    // CRAFTING
+    // =================================================
+
+    else if (
+        mouse_gui_x >= crafting_x &&
+        mouse_gui_x <= crafting_x + tab_width &&
+        mouse_gui_y >= tab_y &&
+        mouse_gui_y <= tab_y + tab_height
+    )
+    {
+        global.ui_screen =
+            1;
     }
 }
 
 
-// ---------------------------------
-// Next recipe
-// ---------------------------------
+// =====================================================
+// DEBUG HOTKEYS
+// =====================================================
 
-if (keyboard_check_pressed(vk_right))
+if (keyboard_check_pressed(vk_f1))
 {
-    global.selected_recipe++;
-
-    if (global.selected_recipe >= array_length(global.recipes))
-    {
-        global.selected_recipe = 0;
-    }
+    global.ui_screen =
+        0;
 }
 
 
-// ---------------------------------
-// Craft with SPACE
-// ---------------------------------
-
-if (keyboard_check_pressed(vk_space))
+if (keyboard_check_pressed(vk_f2))
 {
-    var recipe =
-        global.recipes[global.selected_recipe];
-
-    var result =
-        craft_item(
-            recipe,
-            array_length(global.discovered_items)
-        );
-
-
-    if (result.success)
-    {
-        global.craft_result =
-            "SUCCESS! " + result.item_name;
-
-
-        // Check if already discovered
-
-        var already_discovered = false;
-
-        for (
-            var i = 0;
-            i < array_length(global.discovered_items);
-            i++
-        )
-        {
-            if (
-                global.discovered_items[i]
-                == result.item_id
-            )
-            {
-                already_discovered = true;
-                break;
-            }
-        }
-
-
-        // Add to book
-
-        if (!already_discovered)
-        {
-            array_push(
-                global.discovered_items,
-                result.item_id
-            );
-        }
-    }
-    else
-    {
-        global.craft_result =
-            "FAILED! " + result.item_name;
-    }
+    global.ui_screen =
+        1;
 }

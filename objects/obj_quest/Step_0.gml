@@ -1,77 +1,81 @@
 /// obj_quest - Step Event
 
-var mx = device_mouse_x_to_gui(0);
-var my = device_mouse_y_to_gui(0);
+var mouse_gui_x =
+    device_mouse_x_to_gui(0);
+
+var mouse_gui_y =
+    device_mouse_y_to_gui(0);
 
 
 // =====================================================
-// START QUEST
+// INPUT ONLY ON ECONOMY
 // =====================================================
 
-if (!quest_active)
+if (global.ui_screen == 0)
 {
-    if (mouse_check_button_pressed(mb_left))
+    if (!quest_active)
     {
-        // MUSHROOM
-        if (
-            mx >= mushroom_button_x1 &&
-            mx <= mushroom_button_x2 &&
-            my >= mushroom_button_y1 &&
-            my <= mushroom_button_y2
-        )
+        if (mouse_check_button_pressed(mb_left))
         {
-            quest_active = true;
-            quest_type = "mushrooms";
+            if (
+                mouse_gui_x >= mushroom_button_x1 &&
+                mouse_gui_x <= mushroom_button_x2 &&
+                mouse_gui_y >= mushroom_button_y1 &&
+                mouse_gui_y <= mushroom_button_y2
+            )
+            {
+                quest_active = true;
+                quest_type = "mushrooms";
 
-            quest_duration =
-                mushroom_duration * room_speed;
+                quest_duration =
+                    mushroom_duration * room_speed;
 
-            quest_timer =
-                quest_duration;
+                quest_timer =
+                    quest_duration;
 
-            quest_result =
-                "Searching for Mushrooms...";
-        }
+                quest_result =
+                    "Searching for Mushrooms...";
+            }
 
 
-        // BLOOD
-        else if (
-            mx >= blood_button_x1 &&
-            mx <= blood_button_x2 &&
-            my >= blood_button_y1 &&
-            my <= blood_button_y2
-        )
-        {
-            quest_active = true;
-            quest_type = "blood";
+            else if (
+                mouse_gui_x >= blood_button_x1 &&
+                mouse_gui_x <= blood_button_x2 &&
+                mouse_gui_y >= blood_button_y1 &&
+                mouse_gui_y <= blood_button_y2
+            )
+            {
+                quest_active = true;
+                quest_type = "blood";
 
-            quest_duration =
-                blood_duration * room_speed;
+                quest_duration =
+                    blood_duration * room_speed;
 
-            quest_timer =
-                quest_duration;
+                quest_timer =
+                    quest_duration;
 
-            quest_result =
-                "Blood hunt started...";
+                quest_result =
+                    "Blood hunt started...";
+            }
         }
     }
 }
 
 
 // =====================================================
-// QUEST TIMER
+// TIMER ALWAYS RUNS
 // =====================================================
 
 if (quest_active)
 {
     quest_timer--;
 
+
     if (quest_timer <= 0)
     {
         quest_active = false;
 
 
-        // MUSHROOM REWARD
         if (quest_type == "mushrooms")
         {
             global.material_pool.mushrooms +=
@@ -84,7 +88,6 @@ if (quest_active)
         }
 
 
-        // BLOOD REWARD
         else if (quest_type == "blood")
         {
             global.material_pool.blood +=

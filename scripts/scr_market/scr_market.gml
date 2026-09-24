@@ -10,37 +10,41 @@ function market_generate_prices()
     global.market_prices = {};
 
     for (
-        var w = 0;
-        w < array_length(global.market_worlds);
-        w++
+        var world_i = 0;
+        world_i < array_length(global.market_worlds);
+        world_i++
     )
     {
         var world =
-            global.market_worlds[w];
+            global.market_worlds[world_i];
 
         var world_prices = {};
 
+
         for (
-            var m = 0;
-            m < array_length(global.market_materials);
-            m++
+            var material_i = 0;
+            material_i < array_length(global.market_materials);
+            material_i++
         )
         {
-            var tag =
-                global.market_materials[m];
+            var material_group =
+                global.market_materials[material_i];
+
 
             var multiplier =
                 market_generate_multiplier(
                     world,
-                    tag
+                    material_group
                 );
+
 
             variable_struct_set(
                 world_prices,
-                tag,
+                material_group,
                 multiplier
             );
         }
+
 
         variable_struct_set(
             global.market_prices,
@@ -72,18 +76,18 @@ function market_generate_multiplier(_world, _tag)
             case "jewels":
             case "mushrooms":
             case "blood":
-
+            {
                 min_value = 1.10;
                 max_value = 1.80;
-
+            }
             break;
 
 
             case "polyester":
-
+            {
                 min_value = 0.60;
                 max_value = 1.00;
-
+            }
             break;
         }
     }
@@ -100,19 +104,19 @@ function market_generate_multiplier(_world, _tag)
             case "polyester":
             case "glass":
             case "jewels":
-
+            {
                 min_value = 1.10;
                 max_value = 1.80;
-
+            }
             break;
 
 
             case "tree":
             case "mushrooms":
-
+            {
                 min_value = 0.60;
                 max_value = 1.00;
-
+            }
             break;
         }
     }
@@ -130,18 +134,18 @@ function market_generate_multiplier(_world, _tag)
             case "tree":
             case "cloth":
             case "glass":
-
+            {
                 min_value = 1.05;
                 max_value = 1.60;
-
+            }
             break;
 
 
             case "blood":
-
+            {
                 min_value = 0.60;
                 max_value = 1.00;
-
+            }
             break;
         }
     }
@@ -151,13 +155,16 @@ function market_generate_multiplier(_world, _tag)
     // RANDOM PRICE
     // =================================================
 
-    var value =
+    var generated_value =
         random_range(
             min_value,
             max_value
         );
 
-    return round(value * 100) / 100;
+
+    return
+        round(generated_value * 100)
+        / 100;
 }
 
 
@@ -173,6 +180,22 @@ function market_get_multiplier(_world, _tag)
             _world
         );
 
+
+    if (is_undefined(world_prices))
+    {
+        return 1;
+    }
+
+
+    if (!variable_struct_exists(
+        world_prices,
+        _tag
+    ))
+    {
+        return 1;
+    }
+
+
     return variable_struct_get(
         world_prices,
         _tag
@@ -183,41 +206,160 @@ function market_get_multiplier(_world, _tag)
 // =====================================================
 // ITEM MARKET MULTIPLIER
 // =====================================================
+//
+// IMPORTANT:
+//
+// Recipe material:
+//
+// {
+//     tag: "tree_3",
+//     group: "tree",
+//     percentage: 40
+// }
+//
+// MARKET uses GROUP.
+// CRAFTING uses TAG.
+//
+// =====================================================
 
 function market_get_item_multiplier(_recipe, _world)
 {
-    var total = 0;
-    var total_percentage = 0;
+    var total =
+        0;
+
+    var total_percentage =
+        0;
+
 
     for (
-        var i = 0;
-        i < array_length(_recipe.materials);
-        i++
+        var ingredient_i = 0;
+        ingredient_i < array_length(_recipe.materials);
+        ingredient_i++
     )
     {
-        var material =
-            _recipe.materials[i];
+        var ingredient =
+            _recipe.materials[ingredient_i];
 
-        var multiplier =
+
+        // ---------------------------------------------
+        // MARKET RESOURCE GROUP
+        // ---------------------------------------------
+
+        var market_group =
+            ingredient.group;
+
+
+        // ---------------------------------------------
+        // SAFETY FALLBACK
+        //
+        // Если вдруг какой-то старый рецепт ещё
+        // не имеет group, определяем group по tag.
+        // ---------------------------------------------
+
+        if (is_undefined(market_group))
+        {
+            var ingredient_tag =
+                ingredient.tag;
+
+
+            if (string_pos("stone_", ingredient_tag) == 1)
+            {
+                market_group = "stone";
+            }
+            else if (string_pos("polyester_", ingredient_tag) == 1)
+            {
+                market_group = "polyester";
+            }
+            else if (string_pos("tree_", ingredient_tag) == 1)
+            {
+                market_group = "tree";
+            }
+            else if (string_pos("cloth_", ingredient_tag) == 1)
+            {
+                market_group = "cloth";
+            }
+            else if (string_pos("glass_", ingredient_tag) == 1)
+            {
+                market_group = "glass";
+            }
+            else if (string_pos("jewels_", ingredient_tag) == 1)
+            {
+                market_group = "jewels";
+            }
+            else if (string_pos("mushrooms_", ingredient_tag) == 1)
+            {
+                market_group = "mushrooms";
+            }
+            else if (string_pos("blood_", ingredient_tag) == 1)
+            {
+                market_group = "blood";
+            }
+            else
+            {
+                market_group =
+                    ingredient_tag;
+            }
+        }
+
+
+        // ---------------------------------------------
+        // WORLD MULTIPLIER
+        // ---------------------------------------------
+
+        var ingredient_multiplier =
             market_get_multiplier(
                 _world,
-                material.tag
+                market_group
             );
 
+
+        // ---------------------------------------------
+        // WEIGHT
+        // ---------------------------------------------
+
+        var ingredient_percentage =
+            ingredient.percentage;
+
+
+        if (is_undefined(ingredient_percentage))
+        {
+            ingredient_percentage =
+                0;
+        }
+
+
         total +=
-            multiplier
-            * material.percentage;
+            ingredient_multiplier
+            * ingredient_percentage;
+
 
         total_percentage +=
-            material.percentage;
+            ingredient_percentage;
     }
+
+
+    // =================================================
+    // SAFETY
+    // =================================================
 
     if (total_percentage <= 0)
     {
         return 1;
     }
 
-    return total / total_percentage;
+
+    // =================================================
+    // FINAL ITEM MULTIPLIER
+    // =================================================
+
+    var final_multiplier =
+        total
+        / total_percentage;
+
+
+    return
+        round(final_multiplier * 100)
+        / 100;
 }
 
 
@@ -225,16 +367,19 @@ function market_get_item_multiplier(_recipe, _world)
 // MARKET EVENTS
 //
 // NEGATIVE:
+//
 // Supply Delays       +3%   120 sec
 // Material Shortage   +7%    60 sec
 // Market Panic       +15%    30 sec
 // World Disruption   +35%    10 sec
 //
 // POSITIVE:
+//
 // Stable Supply       -3%   120 sec
 // Material Boom       -7%    60 sec
 // Golden Market      -15%    30 sec
 // Perfect Conditions -30%    10 sec
+//
 // =====================================================
 
 
@@ -245,20 +390,24 @@ function market_get_item_multiplier(_recipe, _world)
 function market_event_start_random()
 {
     var event_roll =
-        irandom_range(0, 7);
+        irandom_range(
+            0,
+            7
+        );
 
 
     // =================================================
-    // NEGATIVE EVENTS
+    // EVENTS
     // =================================================
 
     switch (event_roll)
     {
         // ---------------------------------------------
-        // LONG + WEAK
+        // NEGATIVE
         // ---------------------------------------------
 
         case 0:
+        {
             global.market_event_name =
                 "SUPPLY DELAYS";
 
@@ -267,14 +416,12 @@ function market_event_start_random()
 
             global.market_event_duration =
                 120;
+        }
         break;
 
 
-        // ---------------------------------------------
-        // MEDIUM
-        // ---------------------------------------------
-
         case 1:
+        {
             global.market_event_name =
                 "MATERIAL SHORTAGE";
 
@@ -283,14 +430,12 @@ function market_event_start_random()
 
             global.market_event_duration =
                 60;
+        }
         break;
 
 
-        // ---------------------------------------------
-        // SHORT + STRONG
-        // ---------------------------------------------
-
         case 2:
+        {
             global.market_event_name =
                 "MARKET PANIC";
 
@@ -299,14 +444,12 @@ function market_event_start_random()
 
             global.market_event_duration =
                 30;
+        }
         break;
 
 
-        // ---------------------------------------------
-        // VERY SHORT + VERY STRONG
-        // ---------------------------------------------
-
         case 3:
+        {
             global.market_event_name =
                 "WORLD DISRUPTION";
 
@@ -315,19 +458,16 @@ function market_event_start_random()
 
             global.market_event_duration =
                 10;
+        }
         break;
 
 
-        // =================================================
-        // POSITIVE EVENTS
-        // =================================================
-
-
         // ---------------------------------------------
-        // LONG + WEAK
+        // POSITIVE
         // ---------------------------------------------
 
         case 4:
+        {
             global.market_event_name =
                 "STABLE SUPPLY";
 
@@ -336,14 +476,12 @@ function market_event_start_random()
 
             global.market_event_duration =
                 120;
+        }
         break;
 
 
-        // ---------------------------------------------
-        // MEDIUM
-        // ---------------------------------------------
-
         case 5:
+        {
             global.market_event_name =
                 "MATERIAL BOOM";
 
@@ -352,14 +490,12 @@ function market_event_start_random()
 
             global.market_event_duration =
                 60;
+        }
         break;
 
 
-        // ---------------------------------------------
-        // SHORT + STRONG
-        // ---------------------------------------------
-
         case 6:
+        {
             global.market_event_name =
                 "GOLDEN MARKET";
 
@@ -368,14 +504,12 @@ function market_event_start_random()
 
             global.market_event_duration =
                 30;
+        }
         break;
 
 
-        // ---------------------------------------------
-        // VERY SHORT + VERY STRONG
-        // ---------------------------------------------
-
         case 7:
+        {
             global.market_event_name =
                 "PERFECT CONDITIONS";
 
@@ -384,6 +518,7 @@ function market_event_start_random()
 
             global.market_event_duration =
                 10;
+        }
         break;
     }
 
@@ -395,9 +530,8 @@ function market_event_start_random()
     global.market_event_active =
         true;
 
+
     global.market_event_timer =
         global.market_event_duration
         * room_speed;
 }
-
-
