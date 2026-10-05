@@ -25,13 +25,21 @@ draw_set_alpha(1);
 
 var draw_label = function(_tx, _ty, _text)
 {
-    draw_text(_tx, _ty, _text);
+    draw_text(
+        _tx,
+        _ty,
+        _text
+    );
 };
 
 
 var draw_small = function(_tx, _ty, _text)
 {
-    draw_text(_tx, _ty, _text);
+    draw_text(
+        _tx,
+        _ty,
+        _text
+    );
 };
 
 
@@ -40,38 +48,85 @@ var draw_small = function(_tx, _ty, _text)
 // =====================================================
 
 var col_bg =
-    make_color_rgb(24, 29, 38);
+    make_color_rgb(
+        24,
+        29,
+        38
+    );
+
 
 var col_panel =
-    make_color_rgb(37, 44, 56);
+    make_color_rgb(
+        37,
+        44,
+        56
+    );
+
 
 var col_panel_light =
-    make_color_rgb(61, 73, 90);
+    make_color_rgb(
+        61,
+        73,
+        90
+    );
+
 
 var col_border =
-    make_color_rgb(100, 115, 135);
+    make_color_rgb(
+        100,
+        115,
+        135
+    );
+
 
 var col_purple =
-    make_color_rgb(124, 86, 170);
+    make_color_rgb(
+        124,
+        86,
+        170
+    );
+
 
 var col_red =
-    make_color_rgb(236, 75, 91);
+    make_color_rgb(
+        236,
+        75,
+        91
+    );
+
 
 var col_green =
-    make_color_rgb(100, 220, 140);
+    make_color_rgb(
+        100,
+        220,
+        140
+    );
+
 
 var col_yellow =
-    make_color_rgb(235, 203, 81);
+    make_color_rgb(
+        235,
+        203,
+        81
+    );
+
 
 var col_muted =
-    make_color_rgb(160, 170, 185);
+    make_color_rgb(
+        160,
+        170,
+        185
+    );
 
 
 // =====================================================
 // BACKGROUND
 // =====================================================
 
-draw_set_color(col_bg);
+draw_set_color(
+    col_bg
+);
+
 
 draw_rectangle(
     0,
@@ -86,13 +141,17 @@ draw_rectangle(
 // MODULE DRAW FUNCTION
 // =====================================================
 
-var draw_module = function(_type, _tx, _ty, _size)
+var draw_module =
+function(_type, _tx, _ty, _size)
 {
     var center_x =
-        _tx + _size * 0.5;
+        _tx +
+        _size * 0.5;
+
 
     var center_y =
-        _ty + _size * 0.5;
+        _ty +
+        _size * 0.5;
 
 
     // =================================================
@@ -102,8 +161,13 @@ var draw_module = function(_type, _tx, _ty, _size)
     if (_type == 0)
     {
         draw_set_color(
-            make_color_rgb(80, 207, 225)
+            make_color_rgb(
+                80,
+                207,
+                225
+            )
         );
+
 
         draw_rectangle(
             _tx + 5,
@@ -113,6 +177,7 @@ var draw_module = function(_type, _tx, _ty, _size)
             true
         );
 
+
         draw_line(
             _tx + 16,
             _ty + 19,
@@ -120,12 +185,14 @@ var draw_module = function(_type, _tx, _ty, _size)
             _ty + 19
         );
 
+
         draw_line(
             _tx + 16,
             _ty + 19,
             center_x,
             _ty + _size - 16
         );
+
 
         draw_line(
             _tx + _size - 16,
@@ -143,8 +210,13 @@ var draw_module = function(_type, _tx, _ty, _size)
     else if (_type == 1)
     {
         draw_set_color(
-            make_color_rgb(224, 91, 196)
+            make_color_rgb(
+                224,
+                91,
+                196
+            )
         );
+
 
         draw_rectangle(
             _tx + 5,
@@ -154,8 +226,10 @@ var draw_module = function(_type, _tx, _ty, _size)
             true
         );
 
+
         var edge =
             _size * 0.32;
+
 
         draw_line(
             _tx + 10,
@@ -164,12 +238,14 @@ var draw_module = function(_type, _tx, _ty, _size)
             _ty + 10
         );
 
+
         draw_line(
             _tx + _size - 10,
             _ty + edge,
             _tx + _size - edge,
             _ty + 10
         );
+
 
         draw_line(
             _tx + 10,
@@ -178,10 +254,11 @@ var draw_module = function(_type, _tx, _ty, _size)
             _ty + _size - 10
         );
 
+
         draw_line(
             _tx + _size - 10,
             _ty + _size - edge,
-            _tx + _size - edge,
+            _tx + _size - 10,
             _ty + _size - 10
         );
     }
@@ -194,8 +271,13 @@ var draw_module = function(_type, _tx, _ty, _size)
     else if (_type == 2)
     {
         draw_set_color(
-            make_color_rgb(235, 203, 81)
+            make_color_rgb(
+                235,
+                203,
+                81
+            )
         );
+
 
         draw_rectangle(
             _tx + 5,
@@ -204,6 +286,7 @@ var draw_module = function(_type, _tx, _ty, _size)
             _ty + _size - 5,
             true
         );
+
 
         draw_circle(
             center_x,
@@ -215,14 +298,19 @@ var draw_module = function(_type, _tx, _ty, _size)
 
 
     // =================================================
-    // MODUL_BUFF
+    // BUFF
     // =====================================================
 
     else
     {
         draw_set_color(
-            make_color_rgb(236, 75, 91)
+            make_color_rgb(
+                236,
+                75,
+                91
+            )
         );
+
 
         draw_rectangle(
             _tx + 4,
@@ -238,13 +326,18 @@ var draw_module = function(_type, _tx, _ty, _size)
              ray++)
         {
             var angle_1 =
-                -90 + ray * 36;
+                -90 +
+                ray * 36;
+
 
             var angle_2 =
-                -90 + (ray + 1) * 36;
+                -90 +
+                (ray + 1) * 36;
+
 
             var radius_1 =
                 0;
+
 
             var radius_2 =
                 0;
@@ -262,7 +355,9 @@ var draw_module = function(_type, _tx, _ty, _size)
             }
 
 
-            if ((ray + 1) mod 2 == 0)
+            if (
+                (ray + 1) mod 2 == 0
+            )
             {
                 radius_2 =
                     _size * 0.34;
@@ -310,6 +405,7 @@ var draw_module = function(_type, _tx, _ty, _size)
 
 draw_set_color(c_white);
 
+
 draw_text(
     60,
     68,
@@ -318,10 +414,13 @@ draw_text(
 
 
 // =====================================================
-// MODULE BAR PANEL
+// MODULE BAR
 // =====================================================
 
-draw_set_color(col_panel);
+draw_set_color(
+    col_panel
+);
+
 
 draw_rectangle(
     60,
@@ -333,10 +432,11 @@ draw_rectangle(
 
 
 // =====================================================
-// MODULE GROUP LABELS
+// GROUP LABELS
 // =====================================================
 
 draw_set_color(c_white);
+
 
 draw_label(
     205,
@@ -344,17 +444,20 @@ draw_label(
     "MODUL_C"
 );
 
+
 draw_label(
     550,
     112,
     "MODUL_M"
 );
 
+
 draw_label(
     895,
     112,
     "MODUL_Y"
 );
+
 
 draw_label(
     1260,
@@ -376,21 +479,90 @@ for (var module_slot = 0;
         module_slot *
         ui.module_gap;
 
+
     var module_pos_y =
         ui.module_y;
 
 
-    draw_set_color(
-        make_color_rgb(48, 57, 70)
-    );
+    // =================================================
+    // SELECTED BUFF BACKGROUND
+    // =====================================================
+
+    var module_selected =
+        false;
+
+
+    if (
+        module_slot >= 9 &&
+        drag_kind == 1
+    )
+    {
+        var expected_buff =
+            3 +
+            (module_slot - 9);
+
+
+        if (
+            drag_value ==
+            expected_buff
+        )
+        {
+            module_selected =
+                true;
+        }
+    }
+
+
+    if (module_selected)
+    {
+        draw_set_color(
+            col_purple
+        );
+    }
+    else
+    {
+        draw_set_color(
+            make_color_rgb(
+                48,
+                57,
+                70
+            )
+        );
+    }
+
 
     draw_rectangle(
         module_pos_x,
         module_pos_y,
-        module_pos_x + ui.module_size,
-        module_pos_y + ui.module_size,
+        module_pos_x +
+        ui.module_size,
+        module_pos_y +
+        ui.module_size,
         false
     );
+
+
+    // =================================================
+    // BORDER FOR SELECTED
+    // =====================================================
+
+    if (module_selected)
+    {
+        draw_set_color(
+            c_white
+        );
+
+
+        draw_rectangle(
+            module_pos_x - 3,
+            module_pos_y - 3,
+            module_pos_x +
+            ui.module_size + 3,
+            module_pos_y +
+            ui.module_size + 3,
+            true
+        );
+    }
 
 
     var module_type;
@@ -403,8 +575,7 @@ for (var module_slot = 0;
     }
     else
     {
-        module_type =
-            3;
+        module_type = 3;
     }
 
 
@@ -416,12 +587,9 @@ for (var module_slot = 0;
     );
 
 
-    // =================================================
-    // MODULE LABEL
-    // =====================================================
-
     var module_text =
         "";
+
 
     var module_text_color =
         c_white;
@@ -430,105 +598,116 @@ for (var module_slot = 0;
     switch (module_slot)
     {
         case 0:
-        {
             module_text = "STONE";
             module_text_color =
-                make_color_rgb(150, 150, 150);
-        }
+                make_color_rgb(
+                    150,
+                    150,
+                    150
+                );
         break;
 
 
         case 1:
-        {
             module_text = "POLYESTER";
             module_text_color =
-                make_color_rgb(255, 100, 180);
-        }
+                make_color_rgb(
+                    255,
+                    100,
+                    180
+                );
         break;
 
 
         case 2:
-        {
             module_text = "TREE";
             module_text_color =
-                make_color_rgb(80, 190, 90);
-        }
+                make_color_rgb(
+                    80,
+                    190,
+                    90
+                );
         break;
 
 
         case 3:
-        {
             module_text = "CLOTH";
             module_text_color =
-                make_color_rgb(240, 210, 60);
-        }
+                make_color_rgb(
+                    240,
+                    210,
+                    60
+                );
         break;
 
 
         case 4:
-        {
             module_text = "GLASS";
             module_text_color =
-                make_color_rgb(80, 210, 240);
-        }
+                make_color_rgb(
+                    80,
+                    210,
+                    240
+                );
         break;
 
 
         case 5:
-        {
             module_text = "JEWELS";
             module_text_color =
-                make_color_rgb(60, 100, 255);
-        }
+                make_color_rgb(
+                    60,
+                    100,
+                    255
+                );
         break;
 
 
         case 6:
-        {
             module_text = "MUSHROOMS";
             module_text_color =
-                make_color_rgb(140, 90, 50);
-        }
+                make_color_rgb(
+                    140,
+                    90,
+                    50
+                );
         break;
 
 
         case 7:
-        {
             module_text = "BLOOD";
             module_text_color =
-                make_color_rgb(220, 40, 40);
-        }
+                make_color_rgb(
+                    220,
+                    40,
+                    40
+                );
         break;
 
 
         case 8:
-        {
             module_text = "";
-        }
         break;
 
 
         case 9:
-        {
             module_text = "-10% FAIL";
-            module_text_color = col_red;
-        }
+            module_text_color =
+                col_red;
         break;
 
 
         case 10:
-        {
             module_text = "30% BACK";
-            module_text_color = col_red;
-        }
+            module_text_color =
+                col_red;
         break;
 
 
         case 11:
-        {
             module_text = "2% FIND";
-            module_text_color = col_red;
-        }
+            module_text_color =
+                col_red;
         break;
     }
 
@@ -537,6 +716,7 @@ for (var module_slot = 0;
         module_text_color
     );
 
+
     draw_small(
         module_pos_x,
         215,
@@ -544,13 +724,10 @@ for (var module_slot = 0;
     );
 
 
-    // =================================================
-    // BUFF NUMBER
-    // =====================================================
-
     if (module_slot >= 9)
     {
         draw_set_color(c_white);
+
 
         draw_small(
             module_pos_x + 53,
@@ -567,7 +744,10 @@ for (var module_slot = 0;
 // RESOURCES PANEL
 // =====================================================
 
-draw_set_color(col_panel);
+draw_set_color(
+    col_panel
+);
+
 
 draw_rectangle(
     ui.pool_x1,
@@ -580,6 +760,7 @@ draw_rectangle(
 
 draw_set_color(c_white);
 
+
 draw_label(
     ui.pool_x1 + 20,
     ui.pool_y1 + 18,
@@ -587,7 +768,10 @@ draw_label(
 );
 
 
-draw_set_color(col_muted);
+draw_set_color(
+    col_muted
+);
+
 
 draw_small(
     ui.pool_x1 + 180,
@@ -601,7 +785,8 @@ draw_small(
 // =====================================================
 
 for (var resource_row = 0;
-     resource_row < ui.visible_rows;
+     resource_row <
+     ui.visible_rows;
      resource_row++)
 {
     var resource_index =
@@ -624,9 +809,30 @@ for (var resource_row = 0;
         ui.resource_gap;
 
 
-    draw_set_color(
-        col_panel_light
-    );
+    // =================================================
+    // SELECTED RESOURCE
+    // =====================================================
+
+    var resource_selected =
+        drag_kind == 2
+        &&
+        drag_value ==
+        resource_index;
+
+
+    if (resource_selected)
+    {
+        draw_set_color(
+            col_purple
+        );
+    }
+    else
+    {
+        draw_set_color(
+            col_panel_light
+        );
+    }
+
 
     draw_rectangle(
         ui.resource_x1,
@@ -638,11 +844,28 @@ for (var resource_row = 0;
     );
 
 
+    if (resource_selected)
+    {
+        draw_set_color(c_white);
+
+
+        draw_rectangle(
+            ui.resource_x1 - 2,
+            resource_row_y - 2,
+            ui.resource_x2 + 2,
+            resource_row_y +
+            ui.resource_height + 2,
+            true
+        );
+    }
+
+
     draw_set_color(
         resource_colors[
             resource_index
         ]
     );
+
 
     draw_rectangle(
         ui.resource_x1,
@@ -665,6 +888,7 @@ for (var resource_row = 0;
 
     draw_set_color(c_white);
 
+
     draw_label(
         ui.resource_x2 - 58,
         resource_row_y + 12,
@@ -678,12 +902,13 @@ for (var resource_row = 0;
 
 
 // =====================================================
-// RESOURCE NAVIGATION
+// RESOURCE NAV
 // =====================================================
 
 draw_set_color(
     col_panel_light
 );
+
 
 draw_rectangle(
     ui.resource_x1,
@@ -695,6 +920,7 @@ draw_rectangle(
 
 
 draw_set_color(c_white);
+
 
 draw_label(
     ui.resource_x1 + 18,
@@ -738,6 +964,7 @@ draw_set_color(
     col_panel_light
 );
 
+
 draw_rectangle(
     ui.reset_x1,
     ui.button_y1,
@@ -745,6 +972,7 @@ draw_rectangle(
     ui.button_y2,
     false
 );
+
 
 draw_rectangle(
     ui.random_x1,
@@ -757,11 +985,13 @@ draw_rectangle(
 
 draw_set_color(c_white);
 
+
 draw_label(
     ui.reset_x1 + 39,
     ui.button_y1 + 17,
     "RESET"
 );
+
 
 draw_label(
     ui.random_x1 + 43,
@@ -778,6 +1008,7 @@ draw_set_color(
     col_panel
 );
 
+
 draw_rectangle(
     500,
     285,
@@ -788,10 +1019,11 @@ draw_rectangle(
 
 
 // =====================================================
-// CRAFTING GRID TITLE
+// GRID TITLE
 // =====================================================
 
 draw_set_color(c_white);
+
 
 draw_label(
     520,
@@ -801,47 +1033,123 @@ draw_label(
 
 
 // =====================================================
-// STATUS / MINIGAME REPLIES
+// SELECTED DISPLAY
+// =====================================================
+
+var selected_text =
+    "SELECTED: NONE";
+
+
+var selected_color =
+    col_muted;
+
+
+if (drag_kind == 2)
+{
+    if (
+        drag_value >= 0 &&
+        drag_value <
+        array_length(resources)
+    )
+    {
+        selected_text =
+            "SELECTED: "
+            +
+            resources[
+                drag_value
+            ];
+
+
+        selected_color =
+            resource_colors[
+                drag_value
+            ];
+    }
+}
+
+
+if (drag_kind == 1)
+{
+    selected_color =
+        col_red;
+
+
+    switch (drag_value)
+    {
+        case 3:
+            selected_text =
+                "SELECTED: FAIL";
+        break;
+
+
+        case 4:
+            selected_text =
+                "SELECTED: BACK";
+        break;
+
+
+        case 5:
+            selected_text =
+                "SELECTED: FIND";
+        break;
+    }
+}
+
+
+draw_set_color(
+    selected_color
+);
+
+
+draw_label(
+    790,
+    303,
+    selected_text
+);
+
+
+// =====================================================
+// STATUS
 // =====================================================
 
 var status_text =
     "";
 
+
 var status_recipe =
     find_grid_recipe();
+
 
 var status_buff =
     get_buff();
 
+
 var status_has_anything =
     false;
 
-
-// =====================================================
-// CHECK GRID
-// =====================================================
 
 for (var status_cell = 0;
      status_cell < 9;
      status_cell++)
 {
     if (
-        grid_modules[status_cell] != -1
+        grid_modules[
+            status_cell
+        ] != -1
         ||
-        grid_items[status_cell] != -1
+        grid_items[
+            status_cell
+        ] != -1
     )
     {
         status_has_anything =
             true;
 
+
         break;
     }
 }
 
-
-// =====================================================
-// STATUS RESULT
-// =====================================================
 
 if (craft_result == 1)
 {
@@ -875,13 +1183,10 @@ else
 }
 
 
-// =====================================================
-// DRAW STATUS BAR
-// =====================================================
-
 draw_set_color(
     col_purple
 );
+
 
 draw_rectangle(
     520,
@@ -893,6 +1198,7 @@ draw_rectangle(
 
 
 draw_set_color(c_white);
+
 
 draw_label(
     540,
@@ -934,9 +1240,9 @@ for (var grid_row = 0;
             cell_size;
 
 
-        // =================================================
+        // =============================================
         // CELL BACKGROUND
-        // =====================================================
+        // =============================================
 
         if (
             active_buff != -1 &&
@@ -970,42 +1276,33 @@ for (var grid_row = 0;
         draw_rectangle(
             grid_cell_x + 2,
             grid_cell_y + 2,
-
             grid_cell_x +
             cell_size - 2,
-
             grid_cell_y +
             cell_size - 2,
-
             false
         );
 
-
-        // =================================================
-        // BORDER
-        // =====================================================
 
         draw_set_color(
             col_border
         );
 
+
         draw_rectangle(
             grid_cell_x + 2,
             grid_cell_y + 2,
-
             grid_cell_x +
             cell_size - 2,
-
             grid_cell_y +
             cell_size - 2,
-
             true
         );
 
 
-        // =================================================
+        // =============================================
         // MODULE
-        // =====================================================
+        // =============================================
 
         if (
             grid_modules[
@@ -1017,18 +1314,16 @@ for (var grid_row = 0;
                 grid_modules[
                     grid_index
                 ],
-
                 grid_cell_x + 10,
                 grid_cell_y + 10,
-
                 cell_size - 20
             );
         }
 
 
-        // =================================================
+        // =============================================
         // BUFF NUMBER
-        // =====================================================
+        // =============================================
 
         if (
             grid_modules[
@@ -1036,14 +1331,12 @@ for (var grid_row = 0;
             ] >= 3
         )
         {
-            draw_set_color(
-                c_white
-            );
+            draw_set_color(c_white);
+
 
             draw_label(
                 grid_cell_x +
                 cell_size - 25,
-
                 grid_cell_y +
                 cell_size - 27,
 
@@ -1056,9 +1349,9 @@ for (var grid_row = 0;
         }
 
 
-        // =================================================
+        // =============================================
         // RESOURCE
-        // =====================================================
+        // =============================================
 
         if (
             grid_items[
@@ -1081,7 +1374,6 @@ for (var grid_row = 0;
 
             draw_text(
                 grid_cell_x + 12,
-
                 grid_cell_y +
                 cell_size * 0.43,
 
@@ -1102,6 +1394,7 @@ draw_set_color(
     col_purple
 );
 
+
 draw_rectangle(
     ui.craft_x1,
     ui.button_y1,
@@ -1112,6 +1405,7 @@ draw_rectangle(
 
 
 draw_set_color(c_white);
+
 
 draw_text(
     ui.craft_x1 + 59,
@@ -1131,45 +1425,26 @@ var chance_recipe =
 var base_text =
     "--";
 
+
 var market_text =
     "0%";
 
+
 var buff_text =
     "0%";
+
 
 var final_text =
     "--";
 
 
-// =====================================================
-// MARKET MODIFIER
-// =====================================================
-
 var failure_market =
     get_market_failure_bonus();
 
 
-// =====================================================
-// FAIL BUFF
-// =====================================================
-//
-// IMPORTANT:
-// This is calculated even when there is NO valid recipe.
-//
-// RANDOM can therefore immediately show:
-// FAIL -10%
-// or boosted FAIL -12.5%
-//
-// while BASE / FINAL stay "--" until a recipe exists.
-// =====================================================
-
 var failure_buff =
     get_buff_rate(0);
 
-
-// =====================================================
-// BUFF TEXT
-// =====================================================
 
 if (failure_buff > 0)
 {
@@ -1188,10 +1463,6 @@ else
         "0%";
 }
 
-
-// =====================================================
-// VALID RECIPE FAILURE
-// =====================================================
 
 if (chance_recipe != -1)
 {
@@ -1233,10 +1504,6 @@ if (chance_recipe != -1)
 }
 
 
-// =====================================================
-// MARKET TEXT
-// =====================================================
-
 if (failure_market > 0)
 {
     market_text =
@@ -1266,6 +1533,7 @@ else
 draw_set_color(
     col_panel_light
 );
+
 
 draw_rectangle(
     ui.book_x1,
@@ -1298,7 +1566,7 @@ else
 
 
 // =====================================================
-// BOOK CONTENT
+// BOOK
 // =====================================================
 
 if (book_open)
@@ -1306,6 +1574,7 @@ if (book_open)
     draw_set_color(
         col_panel
     );
+
 
     draw_rectangle(
         ui.book_x1,
@@ -1324,6 +1593,7 @@ if (book_open)
 
     draw_set_color(c_white);
 
+
     draw_label(
         ui.book_x1 + 20,
         ui.book_header_y2 + 18,
@@ -1339,18 +1609,18 @@ if (book_open)
         col_panel_light
     );
 
+
     draw_rectangle(
         ui.book_x1 + 18,
         ui.book_header_y2 + 52,
-
         ui.book_x2 - 18,
         ui.book_header_y2 + 92,
-
         false
     );
 
 
     draw_set_color(c_white);
+
 
     draw_label(
         ui.book_x1 + 32,
@@ -1373,6 +1643,7 @@ if (book_open)
             col_green
         );
 
+
         draw_label(
             ui.book_x1 + 20,
             ui.book_header_y2 + 112,
@@ -1385,6 +1656,7 @@ if (book_open)
             col_muted
         );
 
+
         draw_label(
             ui.book_x1 + 20,
             ui.book_header_y2 + 112,
@@ -1394,10 +1666,55 @@ if (book_open)
 
 
     // =================================================
-    // INGREDIENTS TITLE
+    // LOAD BUTTON
+    // =====================================================
+
+    var load_x1 =
+        ui.book_x2 - 120;
+
+
+    var load_x2 =
+        ui.book_x2 - 20;
+
+
+    var load_y1 =
+        ui.book_header_y2 + 102;
+
+
+    var load_y2 =
+        ui.book_header_y2 + 137;
+
+
+    draw_set_color(
+        col_purple
+    );
+
+
+    draw_rectangle(
+        load_x1,
+        load_y1,
+        load_x2,
+        load_y2,
+        false
+    );
+
+
+    draw_set_color(c_white);
+
+
+    draw_label(
+        load_x1 + 28,
+        load_y1 + 10,
+        "LOAD"
+    );
+
+
+    // =================================================
+    // INGREDIENTS
     // =====================================================
 
     draw_set_color(c_white);
+
 
     draw_label(
         ui.book_x1 + 20,
@@ -1405,10 +1722,6 @@ if (book_open)
         "INGREDIENTS"
     );
 
-
-    // =================================================
-    // INGREDIENTS
-    // =====================================================
 
     var ingredient_count =
         array_length(
@@ -1455,7 +1768,8 @@ if (book_open)
 
 
     for (var ingredient_i = 0;
-         ingredient_i < ingredient_count;
+         ingredient_i <
+         ingredient_count;
          ingredient_i++)
     {
         var ingredient =
@@ -1474,22 +1788,15 @@ if (book_open)
             c_white;
 
 
-        // =================================================
-        // FIND RESOURCE COLOR
-        // =====================================================
-
         for (var color_i = 0;
              color_i <
-                array_length(
-                    resources
-                );
+             array_length(resources);
              color_i++)
         {
             if (
                 resources[
                     color_i
-                ]
-                ==
+                ] ==
                 ingredient.tag
             )
             {
@@ -1498,33 +1805,25 @@ if (book_open)
                         color_i
                     ];
 
+
                 break;
             }
         }
 
 
-        // =================================================
-        // COLOR STRIPE
-        // =====================================================
-
         draw_set_color(
             ingredient_color
         );
 
+
         draw_rectangle(
             ui.book_x1 + 20,
             ingredient_y + 1,
-
             ui.book_x1 + 27,
             ingredient_y + 20,
-
             false
         );
 
-
-        // =================================================
-        // INGREDIENT NAME
-        // =====================================================
 
         draw_label(
             ui.book_x1 + 40,
@@ -1533,11 +1832,8 @@ if (book_open)
         );
 
 
-        // =================================================
-        // PERCENTAGE
-        // =====================================================
-
         draw_set_color(c_white);
+
 
         draw_label(
             ui.book_x2 - 75,
@@ -1565,6 +1861,7 @@ draw_set_color(
     )
 );
 
+
 draw_rectangle(
     1080,
     670,
@@ -1575,6 +1872,7 @@ draw_rectangle(
 
 
 draw_set_color(c_white);
+
 
 draw_label(
     1100,
@@ -1591,6 +1889,7 @@ draw_set_color(
     col_muted
 );
 
+
 draw_label(
     1100,
     710,
@@ -1599,6 +1898,7 @@ draw_label(
 
 
 draw_set_color(c_white);
+
 
 draw_label(
     1460,
@@ -1645,7 +1945,9 @@ if (
                 );
 
 
-            if (market_seconds_left < 0)
+            if (
+                market_seconds_left < 0
+            )
             {
                 market_seconds_left = 0;
             }
@@ -1688,20 +1990,12 @@ else
 }
 
 
-// =====================================================
-// MARKET LABEL
-// =====================================================
-
 draw_label(
     1100,
     732,
     market_label
 );
 
-
-// =====================================================
-// MARKET VALUE
-// =====================================================
 
 if (failure_market > 0)
 {
@@ -1717,9 +2011,7 @@ else if (failure_market < 0)
 }
 else
 {
-    draw_set_color(
-        c_white
-    );
+    draw_set_color(c_white);
 }
 
 
@@ -1770,6 +2062,7 @@ draw_set_color(
     col_purple
 );
 
+
 draw_rectangle(
     1095,
     775,
@@ -1781,6 +2074,7 @@ draw_rectangle(
 
 draw_set_color(c_white);
 
+
 draw_label(
     1110,
     785,
@@ -1791,6 +2085,7 @@ draw_label(
 draw_set_color(
     col_yellow
 );
+
 
 draw_label(
     1450,
@@ -1807,6 +2102,7 @@ draw_set_color(
     col_panel
 );
 
+
 draw_rectangle(
     1080,
     825,
@@ -1819,6 +2115,7 @@ draw_rectangle(
 draw_set_color(
     col_red
 );
+
 
 draw_small(
     1100,
@@ -1897,97 +2194,19 @@ if (craft_note != "")
 
 
 // =====================================================
-// DRAG PREVIEW
+// CONTROL HINT
 // =====================================================
 
-if (drag_kind != 0)
-{
-    var mouse_gui_x =
-        device_mouse_x_to_gui(0);
-
-    var mouse_gui_y =
-        device_mouse_y_to_gui(0);
+draw_set_color(
+    col_muted
+);
 
 
-    // =================================================
-    // MODULE
-    // =====================================================
-
-    if (drag_kind == 1)
-    {
-        draw_module(
-            drag_value,
-
-            mouse_gui_x + 12,
-            mouse_gui_y + 12,
-
-            60
-        );
-
-
-        if (drag_value >= 3)
-        {
-            draw_set_color(
-                c_white
-            );
-
-            draw_label(
-                mouse_gui_x + 58,
-                mouse_gui_y + 58,
-
-                string(
-                    drag_value - 2
-                )
-            );
-        }
-    }
-
-
-    // =================================================
-    // RESOURCE
-    // =====================================================
-
-    else
-    {
-        if (
-            drag_value >= 0
-            &&
-            drag_value <
-            array_length(resources)
-        )
-        {
-            draw_set_color(
-                col_panel_light
-            );
-
-            draw_rectangle(
-                mouse_gui_x + 12,
-                mouse_gui_y + 12,
-
-                mouse_gui_x + 175,
-                mouse_gui_y + 50,
-
-                false
-            );
-
-
-            draw_set_color(
-                resource_colors[
-                    drag_value
-                ]
-            );
-
-            draw_label(
-                mouse_gui_x + 22,
-                mouse_gui_y + 24,
-
-                resources[
-                    drag_value
-                ]
-            );
-        }
-    }
-}
+draw_small(
+    520,
+    860,
+    "LMB: PLACE / RMB: CLEAR / LOAD: RECIPE TEMPLATE"
+);
 
 
 // =====================================================
