@@ -1,204 +1,34 @@
 /// obj_minigame_ui - Create Event
 
-
-// =====================================================
-// UI LAYOUT
-// =====================================================
-//
-// GUI = 1600x900
-//
-// LEFT   = resources
-// CENTER = crafting grid
-// RIGHT  = recipe book
-//
-// =====================================================
-
-ui = {
-    // -------------------------------------------------
-    // MODULE BAR
-    // -------------------------------------------------
-
-    module_x: 145,
-    module_y: 140,
-    module_gap: 115,
-    module_size: 70,
-
-
-    // -------------------------------------------------
-    // RESOURCES
-    // -------------------------------------------------
-
-    pool_x1: 60,
-    pool_y1: 285,
-    pool_x2: 400,
-    pool_y2: 815,
-
-    resource_x1: 80,
-    resource_x2: 380,
-    resource_y: 345,
-
-    resource_gap: 52,
-    resource_height: 42,
-    visible_rows: 6,
-
-    pool_nav_y1: 665,
-    pool_nav_y2: 705,
-
-
-    // -------------------------------------------------
-    // GRID
-    // -------------------------------------------------
-
-    grid_x: 592,
-    grid_y: 390,
-    cell_size: 105,
-
-
-    // -------------------------------------------------
-    // BUTTONS
-    // -------------------------------------------------
-
-    reset_x1: 80,
-    reset_x2: 215,
-
-    random_x1: 225,
-    random_x2: 380,
-
-    craft_x1: 650,
-    craft_x2: 850,
-
-    button_y1: 750,
-    button_y2: 800,
-
-
-    // -------------------------------------------------
-    // RECIPE BOOK
-    // -------------------------------------------------
-
-    book_x1: 1080,
-    book_x2: 1530,
-
-    book_y1: 285,
-    book_y2: 650,
-
-    book_header_y2: 330,
-
-
-
-    // -------------------------------------------------
-    // TOP TABS
-    // -------------------------------------------------
-
-    craft_tab_x1: 800,
-    craft_tab_x2: 940,
-
-    economy_tab_x1: 650,
-    economy_tab_x2: 790,
-
-    tab_y1: 10,
-    tab_y2: 42
-};
-
-
-// =====================================================
-// RESOURCE DEFINITIONS
-// =====================================================
-
 resources = [];
-
-resource_modules = [];
-resource_tags = [];
+resource_groups = [];
+resource_module_types = [];
 resource_colors = [];
-resource_variants = [];
-
-
-// =====================================================
-// RESOURCE GROUPS
-// =====================================================
 
 var groups = [
-    "stone",
-    "polyester",
-    "tree",
-    "cloth",
-    "glass",
-    "jewels",
-    "mushrooms",
-    "blood"
+    "stone", "polyester", "tree", "cloth",
+    "glass", "jewels", "mushrooms", "blood"
 ];
 
-
-// =====================================================
-// NUMBER OF VARIANTS
-// =====================================================
-
-var variant_counts = [
-    1, // stone
-    2, // polyester
-    3, // tree
-    3, // cloth
-    3, // glass
-    4, // jewels
-    4, // mushrooms
-    5  // blood
-];
-
-
-// =====================================================
-// MODULE COMPATIBILITY
-// =====================================================
-//
-// 0 = MODUL_C
-// 1 = MODUL_M
-// 2 = MODUL_Y
-//
-// BUFF:
-// 3 = FAIL
-// 4 = BACK
-// 5 = FIND
-//
-// =====================================================
-
-var module_types = [
-    0, // stone
-    0, // polyester
-    0, // tree
-
-    1, // cloth
-    1, // glass
-    1, // jewels
-
-    2, // mushrooms
-    2  // blood
-];
-
-
-// =====================================================
-// RESOURCE COLORS
-// =====================================================
+var counts = [1, 2, 3, 3, 3, 4, 4, 5];
 
 var group_colors = [
-    make_color_rgb(150, 150, 150), // stone
-    make_color_rgb(255, 100, 180), // polyester
-    make_color_rgb(80, 190, 90),   // tree
-    make_color_rgb(240, 210, 60),  // cloth
-    make_color_rgb(80, 210, 240),  // glass
-    make_color_rgb(60, 100, 255),  // jewels
-    make_color_rgb(140, 90, 50),   // mushrooms
-    make_color_rgb(220, 40, 40)    // blood
+    make_color_rgb(150,150,150),
+    make_color_rgb(255,100,180),
+    make_color_rgb(80,190,90),
+    make_color_rgb(240,210,60),
+    make_color_rgb(80,210,240),
+    make_color_rgb(60,100,255),
+    make_color_rgb(140,90,50),
+    make_color_rgb(220,40,40)
 ];
 
+var group_modules = [0,0,0,1,1,1,2,2];
 
-// =====================================================
-// CREATE RESOURCE VARIANTS
-// =====================================================
-
-for (var group_i = 0;
-     group_i < array_length(groups);
-     group_i++)
+for (var group_i = 0; group_i < 8; group_i++)
 {
     for (var variant_i = 1;
-         variant_i <= variant_counts[group_i];
+         variant_i <= counts[group_i];
          variant_i++)
     {
         array_push(
@@ -206,1214 +36,498 @@ for (var group_i = 0;
             groups[group_i] + "_" + string(variant_i)
         );
 
-        array_push(
-            resource_modules,
-            module_types[group_i]
-        );
-
-        array_push(
-            resource_tags,
-            groups[group_i]
-        );
-
-        array_push(
-            resource_colors,
-            group_colors[group_i]
-        );
-
-        array_push(
-            resource_variants,
-            variant_i
-        );
+        array_push(resource_groups, groups[group_i]);
+        array_push(resource_module_types, group_modules[group_i]);
+        array_push(resource_colors, group_colors[group_i]);
     }
 }
 
 
 // =====================================================
-// STATE
+// GRID STATE
 // =====================================================
+
+upper_modules = array_create(6, -1);
+
+// Lower:
+// -1 empty
+// >=0 resource
+// -2 FAIL
+// -3 BACK
+// -4 FIND
+
+lower_cells = array_create(9, -1);
+
+presets = craft_v2_presets();
+item_names = craft_v2_item_names();
+
+selected_preset = 0;
+selected_item = 0;
 
 resource_scroll = 0;
+visible_rows = 6;
 
-recipes = global.recipes;
-
-book_index = 0;
-book_open = true;
+craft_result = 0;
+craft_note = "Choose a preset and place ingredients.";
 
 
 // =====================================================
-// GRID
+// SELECTION
 // =====================================================
 
-grid_x = ui.grid_x;
-grid_y = ui.grid_y;
-cell_size = ui.cell_size;
-
-grid_modules = array_create(9, -1);
-grid_items = array_create(9, -1);
+selected_kind = 0;
+selected_value = -1;
 
 
 // =====================================================
 // DRAG
-//
-// 0 = nothing
-// 1 = module
-// 2 = resource
 // =====================================================
+
+drag_active = false;
+drag_started = false;
 
 drag_kind = 0;
 drag_value = -1;
-drag_from = -1;
+
+drag_origin_panel = 0;
+drag_origin_cell = -1;
+
+drag_start_x = 0;
+drag_start_y = 0;
 
 
 // =====================================================
-// CRAFT RESULT
-//
-// 0 = neutral
-// 1 = success
-// 2 = fail
+// UI LAYOUT
 // =====================================================
 
-craft_result = 0;
-craft_note = "";
+ui = {
+    upper_x: 650,
+    upper_y: 260,
+    upper_cell: 76,
 
+    lower_x: 650,
+    lower_y: 540,
+    lower_cell: 76,
 
-// =====================================================
-// GET RESOURCE COUNT
-// =====================================================
+    pool_x: 40,
+    pool_y: 205,
+    pool_w: 330,
 
-get_resource_count = function(_resource_index)
-{
-    if (_resource_index < 0)
-    {
-        return 0;
-    }
+    resource_y: 270,
+    resource_step: 50,
 
-    if (_resource_index >= array_length(resource_tags))
-    {
-        return 0;
-    }
+    preset_x: 405,
+    preset_y: 245,
+    preset_w: 160,
+    preset_h: 40,
 
+    module_x: 405,
+    module_y: 560,
+    module_step: 54,
 
-    var resource_group =
-        resource_tags[_resource_index];
+    buff_y: 760,
 
+    book_x: 1010,
+    book_y: 205,
+    book_w: 540,
 
-    switch (resource_group)
-    {
-        case "stone":
-            return global.material_pool.stone;
-
-        case "polyester":
-            return global.material_pool.polyester;
-
-        case "tree":
-            return global.material_pool.tree;
-
-        case "cloth":
-            return global.material_pool.cloth;
-
-        case "glass":
-            return global.material_pool.glass;
-
-        case "jewels":
-            return global.material_pool.jewels;
-
-        case "mushrooms":
-            return global.material_pool.mushrooms;
-
-        case "blood":
-            return global.material_pool.blood;
-    }
-
-
-    return 0;
+    craft_x: 680,
+    craft_y: 835,
+    craft_w: 170,
+    craft_h: 42
 };
 
 
 // =====================================================
-// SPEND RESOURCE
+// MATERIAL POOL
 // =====================================================
 
-spend_resource = function(_resource_index, _amount)
+get_pool_amount = function(_group)
 {
-    if (_resource_index < 0)
-    {
-        return false;
-    }
-
-    if (_resource_index >= array_length(resource_tags))
-    {
-        return false;
-    }
-
-
-    var resource_group =
-        resource_tags[_resource_index];
-
-
-    switch (resource_group)
-    {
-        case "stone":
-        {
-            if (global.material_pool.stone < _amount)
-            {
-                return false;
-            }
-
-            global.material_pool.stone -= _amount;
-
-            return true;
-        }
-
-
-        case "polyester":
-        {
-            if (global.material_pool.polyester < _amount)
-            {
-                return false;
-            }
-
-            global.material_pool.polyester -= _amount;
-
-            return true;
-        }
-
-
-        case "tree":
-        {
-            if (global.material_pool.tree < _amount)
-            {
-                return false;
-            }
-
-            global.material_pool.tree -= _amount;
-
-            return true;
-        }
-
-
-        case "cloth":
-        {
-            if (global.material_pool.cloth < _amount)
-            {
-                return false;
-            }
-
-            global.material_pool.cloth -= _amount;
-
-            return true;
-        }
-
-
-        case "glass":
-        {
-            if (global.material_pool.glass < _amount)
-            {
-                return false;
-            }
-
-            global.material_pool.glass -= _amount;
-
-            return true;
-        }
-
-
-        case "jewels":
-        {
-            if (global.material_pool.jewels < _amount)
-            {
-                return false;
-            }
-
-            global.material_pool.jewels -= _amount;
-
-            return true;
-        }
-
-
-        case "mushrooms":
-        {
-            if (global.material_pool.mushrooms < _amount)
-            {
-                return false;
-            }
-
-            global.material_pool.mushrooms -= _amount;
-
-            return true;
-        }
-
-
-        case "blood":
-        {
-            if (global.material_pool.blood < _amount)
-            {
-                return false;
-            }
-
-            global.material_pool.blood -= _amount;
-
-            return true;
-        }
-    }
-
-
-    return false;
+    return variable_struct_get(global.material_pool, _group);
 };
 
-
-// =====================================================
-// RETURN RESOURCE
-// =====================================================
-
-return_resource = function(_resource_index, _amount)
+change_pool_amount = function(_group, _change)
 {
-    if (_resource_index < 0)
-    {
-        return;
-    }
+    var amount = variable_struct_get(global.material_pool, _group);
 
-    if (_resource_index >= array_length(resource_tags))
-    {
-        return;
-    }
-
-
-    var resource_group =
-        resource_tags[_resource_index];
-
-
-    switch (resource_group)
-    {
-        case "stone":
-            global.material_pool.stone += _amount;
-        break;
-
-
-        case "polyester":
-            global.material_pool.polyester += _amount;
-        break;
-
-
-        case "tree":
-            global.material_pool.tree += _amount;
-        break;
-
-
-        case "cloth":
-            global.material_pool.cloth += _amount;
-        break;
-
-
-        case "glass":
-            global.material_pool.glass += _amount;
-        break;
-
-
-        case "jewels":
-            global.material_pool.jewels += _amount;
-        break;
-
-
-        case "mushrooms":
-            global.material_pool.mushrooms += _amount;
-        break;
-
-
-        case "blood":
-            global.material_pool.blood += _amount;
-        break;
-    }
-};
-
-
-// =====================================================
-// IS RECIPE DISCOVERED
-// =====================================================
-
-is_recipe_discovered = function(_recipe_index)
-{
-    if (_recipe_index < 0)
-    {
-        return false;
-    }
-
-    if (_recipe_index >= array_length(recipes))
-    {
-        return false;
-    }
-
-
-    var recipe_id =
-        recipes[_recipe_index].id;
-
-
-    for (var discovered_i = 0;
-         discovered_i < array_length(global.discovered_items);
-         discovered_i++)
-    {
-        if (
-            global.discovered_items[discovered_i]
-            ==
-            recipe_id
-        )
-        {
-            return true;
-        }
-    }
-
-
-    return false;
-};
-
-
-// =====================================================
-// DISCOVERED COUNT
-// =====================================================
-
-get_discovered_count = function()
-{
-    return array_length(
-        global.discovered_items
+    variable_struct_set(
+        global.material_pool,
+        _group,
+        amount + _change
     );
 };
 
 
 // =====================================================
-// DISCOVER RECIPE
+// CELL LOOKUP - WITH BOUNDS
 // =====================================================
 
-discover_recipe = function(_recipe_index)
+get_upper_cell = function(_mx, _my)
 {
-    if (_recipe_index < 0)
-    {
-        return false;
-    }
-
-    if (_recipe_index >= array_length(recipes))
-    {
-        return false;
-    }
-
-
-    if (is_recipe_discovered(_recipe_index))
-    {
-        return false;
-    }
-
-
-    array_push(
-        global.discovered_items,
-        recipes[_recipe_index].id
-    );
-
-
-    return true;
-};
-
-
-// =====================================================
-// ADD CRAFTED ITEM
-// =====================================================
-
-add_crafted_item = function(_recipe_index, _amount)
-{
-    if (_recipe_index < 0)
-    {
-        return;
-    }
-
-    if (_recipe_index >= array_length(recipes))
-    {
-        return;
-    }
-
-
-    var item_id =
-        recipes[_recipe_index].id;
-
-
-    switch (item_id)
-    {
-        case "item_01":
-            global.item_inventory.item_01 += _amount;
-        break;
-
-        case "item_02":
-            global.item_inventory.item_02 += _amount;
-        break;
-
-        case "item_03":
-            global.item_inventory.item_03 += _amount;
-        break;
-
-        case "item_04":
-            global.item_inventory.item_04 += _amount;
-        break;
-
-        case "item_05":
-            global.item_inventory.item_05 += _amount;
-        break;
-
-        case "item_06":
-            global.item_inventory.item_06 += _amount;
-        break;
-
-        case "item_07":
-            global.item_inventory.item_07 += _amount;
-        break;
-
-        case "item_08":
-            global.item_inventory.item_08 += _amount;
-        break;
-
-        case "item_09":
-            global.item_inventory.item_09 += _amount;
-        break;
-
-        case "item_10":
-            global.item_inventory.item_10 += _amount;
-        break;
-
-        case "item_11":
-            global.item_inventory.item_11 += _amount;
-        break;
-
-        case "item_12":
-            global.item_inventory.item_12 += _amount;
-        break;
-
-        case "item_13":
-            global.item_inventory.item_13 += _amount;
-        break;
-
-        case "item_14":
-            global.item_inventory.item_14 += _amount;
-        break;
-
-        case "item_15":
-            global.item_inventory.item_15 += _amount;
-        break;
-
-        case "item_16":
-            global.item_inventory.item_16 += _amount;
-        break;
-
-        case "item_17":
-            global.item_inventory.item_17 += _amount;
-        break;
-
-        case "item_18":
-            global.item_inventory.item_18 += _amount;
-        break;
-
-        case "item_19":
-            global.item_inventory.item_19 += _amount;
-        break;
-
-        case "item_20":
-            global.item_inventory.item_20 += _amount;
-        break;
-    }
-};
-
-
-// =====================================================
-// BUFF PATTERN
-// =====================================================
-//
-// Активная клетка:
-//
-// RESOURCE
-// или
-// BUFF MODULE
-//
-// Пустой обычный модуль не считается частью фигуры.
-//
-// =====================================================
-
-get_buff = function()
-{
-    var patterns = [
-        [1, 4, 6, 7, 8],
-        [1, 3, 4, 5, 7],
-        [0, 2, 4, 6, 8],
-        [0, 4, 8],
-        [2, 4, 6],
-        [0, 2, 4, 7],
-        [4, 8],
-        [0, 1]
-    ];
-
-
-    for (var pattern_i = 0;
-         pattern_i < array_length(patterns);
-         pattern_i++)
-    {
-        var same_pattern =
-            true;
-
-
-        for (var pattern_cell = 0;
-             pattern_cell < 9;
-             pattern_cell++)
-        {
-            var required_cell =
-                false;
-
-
-            for (var pattern_part = 0;
-                 pattern_part < array_length(patterns[pattern_i]);
-                 pattern_part++)
-            {
-                if (
-                    patterns[pattern_i][pattern_part]
-                    ==
-                    pattern_cell
-                )
-                {
-                    required_cell =
-                        true;
-
-                    break;
-                }
-            }
-
-
-            var active_cell =
-                false;
-
-
-            if (
-                grid_modules[pattern_cell]
-                >= 3
-            )
-            {
-                active_cell =
-                    true;
-            }
-
-
-            if (
-                grid_items[pattern_cell]
-                != -1
-            )
-            {
-                active_cell =
-                    true;
-            }
-
-
-            if (
-                active_cell
-                !=
-                required_cell
-            )
-            {
-                same_pattern =
-                    false;
-
-                break;
-            }
-        }
-
-
-        if (same_pattern)
-        {
-            return pattern_i;
-        }
-    }
-
-
-    return -1;
-};
-
-
-// =====================================================
-// FIND GRID RECIPE
-// =====================================================
-
-find_grid_recipe = function()
-{
-    var filled_count =
-        0;
-
-
-    // =================================================
-    // VALIDATE GRID
-    // =================================================
-
-    for (var grid_check_cell = 0;
-         grid_check_cell < 9;
-         grid_check_cell++)
-    {
-        var check_module =
-            grid_modules[
-                grid_check_cell
-            ];
-
-
-        var check_item =
-            grid_items[
-                grid_check_cell
-            ];
-
-
-        // ---------------------------------------------
-        // BUFF
-        // ---------------------------------------------
-
-        if (check_module >= 3)
-        {
-            // Buff cannot contain resource.
-
-            if (check_item != -1)
-            {
-                return -1;
-            }
-
-
-            continue;
-        }
-
-
-        // ---------------------------------------------
-        // EMPTY NORMAL MODULE
-        // ---------------------------------------------
-
-        if (
-            check_module != -1
-            &&
-            check_item == -1
-        )
-        {
-            return -1;
-        }
-
-
-        // ---------------------------------------------
-        // RESOURCE
-        // ---------------------------------------------
-
-        if (check_item != -1)
-        {
-            if (check_module == -1)
-            {
-                return -1;
-            }
-
-
-            if (check_item < 0)
-            {
-                return -1;
-            }
-
-
-            if (
-                check_item >=
-                array_length(resources)
-            )
-            {
-                return -1;
-            }
-
-
-            if (
-                check_module
-                !=
-                resource_modules[
-                    check_item
-                ]
-            )
-            {
-                return -1;
-            }
-
-
-            filled_count++;
-        }
-    }
-
-
-    if (filled_count <= 0)
+    if (
+        _mx < ui.upper_x ||
+        _mx >= ui.upper_x + ui.upper_cell * 3 ||
+        _my < ui.upper_y ||
+        _my >= ui.upper_y + ui.upper_cell * 2
+    )
     {
         return -1;
     }
 
+    var cell_col = floor((_mx - ui.upper_x) / ui.upper_cell);
+    var cell_row = floor((_my - ui.upper_y) / ui.upper_cell);
 
-    // =================================================
-    // FIND RECIPE
-    // =================================================
+    return cell_row * 3 + cell_col;
+};
 
-    for (var recipe_search_i = 0;
-         recipe_search_i < array_length(recipes);
-         recipe_search_i++)
+get_lower_cell = function(_mx, _my)
+{
+    if (
+        _mx < ui.lower_x ||
+        _mx >= ui.lower_x + ui.lower_cell * 3 ||
+        _my < ui.lower_y ||
+        _my >= ui.lower_y + ui.lower_cell * 3
+    )
     {
-        var recipe_ingredients =
-            recipes[
-                recipe_search_i
-            ].materials;
-
-
-        if (
-            array_length(
-                recipe_ingredients
-            )
-            !=
-            filled_count
-        )
-        {
-            continue;
-        }
-
-
-        var recipe_matches =
-            true;
-
-
-        // ---------------------------------------------
-        // One grid cell cannot match twice.
-        // ---------------------------------------------
-
-        var used_cells =
-            array_create(
-                9,
-                false
-            );
-
-
-        for (var ingredient_i = 0;
-             ingredient_i < array_length(recipe_ingredients);
-             ingredient_i++)
-        {
-            var ingredient_found =
-                false;
-
-
-            var wanted_tag =
-                recipe_ingredients[
-                    ingredient_i
-                ].tag;
-
-
-            for (var recipe_grid_cell = 0;
-                 recipe_grid_cell < 9;
-                 recipe_grid_cell++)
-            {
-                if (
-                    used_cells[
-                        recipe_grid_cell
-                    ]
-                )
-                {
-                    continue;
-                }
-
-
-                var recipe_resource =
-                    grid_items[
-                        recipe_grid_cell
-                    ];
-
-
-                if (recipe_resource == -1)
-                {
-                    continue;
-                }
-
-
-                if (
-                    resources[
-                        recipe_resource
-                    ]
-                    ==
-                    wanted_tag
-                )
-                {
-                    used_cells[
-                        recipe_grid_cell
-                    ] = true;
-
-
-                    ingredient_found =
-                        true;
-
-
-                    break;
-                }
-            }
-
-
-            if (!ingredient_found)
-            {
-                recipe_matches =
-                    false;
-
-                break;
-            }
-        }
-
-
-        if (recipe_matches)
-        {
-            return recipe_search_i;
-        }
+        return -1;
     }
 
+    var cell_col = floor((_mx - ui.lower_x) / ui.lower_cell);
+    var cell_row = floor((_my - ui.lower_y) / ui.lower_cell);
 
-    return -1;
+    return cell_row * 3 + cell_col;
 };
 
 
 // =====================================================
-// BUFF RATE
-// =====================================================
-//
-// type 0 = FAIL
-//          -10 percentage points
-//
-// type 1 = BACK
-//          30% chance
-//
-// type 2 = FIND
-//          2% chance
-//
-// Correct shape = x1.25
-//
+// GEOMETRY
 // =====================================================
 
-get_buff_rate = function(_type)
+get_lower_occupied = function()
 {
-    var base_rate =
-        0;
+    var occupied = array_create(9, -1);
 
-
-    switch (_type)
+    for (var cell_i = 0; cell_i < 9; cell_i++)
     {
-        case 0:
-            base_rate = 10;
-        break;
-
-
-        case 1:
-            base_rate = 30;
-        break;
-
-
-        case 2:
-            base_rate = 2;
-        break;
-
-
-        default:
-            return 0;
+        if (lower_cells[cell_i] != -1)
+        {
+            occupied[cell_i] = 1;
+        }
     }
 
+    return occupied;
+};
 
-    var required_module =
-        _type + 3;
+get_shape = function()
+{
+    return craft_v2_buff_shape(get_lower_occupied());
+};
 
 
-    var buff_exists =
-        false;
+// =====================================================
+// BUFFS
+// =====================================================
 
+get_buff_rate = function(_buff_type)
+{
+    var code = -2 - _buff_type;
+    var found = false;
 
-    for (var buff_cell = 0;
-         buff_cell < 9;
-         buff_cell++)
+    for (var cell_i = 0; cell_i < 9; cell_i++)
     {
-        if (
-            grid_modules[
-                buff_cell
-            ]
-            ==
-            required_module
-        )
+        if (lower_cells[cell_i] == code)
         {
-            buff_exists =
-                true;
-
+            found = true;
             break;
         }
     }
 
+    if (!found) return 0;
 
-    if (!buff_exists)
+    var base = 0;
+
+    switch (_buff_type)
     {
-        return 0;
+        case 0: base = 10; break;
+        case 1: base = 30; break;
+        case 2: base = 2; break;
     }
 
-
-    // Correct shape gives +25% buff strength.
-
-    if (get_buff() != -1)
+    if (get_shape() != -1)
     {
-        return base_rate * 1.25;
+        base *= 1.25;
     }
 
-
-    return base_rate;
+    return base;
 };
 
 
 // =====================================================
-// MARKET FAILURE BONUS
-// =====================================================
-//
-// Читаем ТО ЖЕ глобальное событие, которое использует
-// экран ECONOMY.
-//
-// Примеры:
-//
-// MARKET PANIC
-// +15 percentage points
-//
-// STABLE SUPPLY
-// -3 percentage points
-//
-// Если event отсутствует / закончился = 0.
-//
+// PRESETS
 // =====================================================
 
-get_market_failure_bonus = function()
+apply_preset = function(_index)
 {
-    // -------------------------------------------------
-    // Market system not initialized yet
-    // -------------------------------------------------
+    selected_preset = _index;
 
-    if (
-        !variable_global_exists(
-            "market_event_active"
-        )
-    )
+    var pattern = presets[_index].pattern;
+
+    for (var cell_i = 0; cell_i < 6; cell_i++)
     {
-        return 0;
+        upper_modules[cell_i] = pattern[cell_i];
     }
 
-
-    // -------------------------------------------------
-    // No active event
-    // -------------------------------------------------
-
-    if (!global.market_event_active)
-    {
-        return 0;
-    }
-
-
-    // -------------------------------------------------
-    // Safety
-    // -------------------------------------------------
-
-    if (
-        !variable_global_exists(
-            "market_event_failure_bonus"
-        )
-    )
-    {
-        return 0;
-    }
-
-
-    return global.market_event_failure_bonus;
+    craft_result = 0;
+    craft_note = "PRESET: " + presets[_index].name;
 };
 
 
 // =====================================================
-// MARKET EVENT NAME
-// =====================================================
-//
-// Используется Draw GUI.
-// Возвращает пустую строку, если события нет.
-//
+// DOMINANT MATERIAL
 // =====================================================
 
-get_market_event_name = function()
+get_dominant_group = function()
 {
-    if (
-        !variable_global_exists(
-            "market_event_active"
-        )
-    )
+    var group_names = [
+        "stone", "polyester", "tree", "cloth",
+        "glass", "jewels", "mushrooms", "blood"
+    ];
+
+    var amounts = array_create(8, 0);
+
+    for (var cell_i = 0; cell_i < 9; cell_i++)
     {
-        return "";
+        var resource_index = lower_cells[cell_i];
+
+        if (resource_index < 0) continue;
+
+        var group = resource_groups[resource_index];
+
+        for (var group_i = 0; group_i < 8; group_i++)
+        {
+            if (group_names[group_i] == group)
+            {
+                amounts[group_i]++;
+                break;
+            }
+        }
     }
 
+    var best_index = -1;
+    var best_amount = 0;
 
-    if (!global.market_event_active)
+    for (var check_i = 0; check_i < 8; check_i++)
     {
-        return "";
+        if (amounts[check_i] > best_amount)
+        {
+            best_amount = amounts[check_i];
+            best_index = check_i;
+        }
     }
 
+    if (best_index == -1) return "";
 
-    if (
-        !variable_global_exists(
-            "market_event_name"
-        )
-    )
-    {
-        return "";
-    }
-
-
-    return global.market_event_name;
+    return group_names[best_index];
 };
 
 
 // =====================================================
-// MARKET EVENT TIME LEFT
-// =====================================================
-//
-// Возвращает секунды.
-//
+// CURRENT RESULT
 // =====================================================
 
-get_market_event_seconds = function()
+get_current_item = function()
 {
-    if (
-        !variable_global_exists(
-            "market_event_active"
-        )
-    )
+    var preset_index = craft_v2_match_preset(upper_modules);
+
+    if (preset_index == -1) return -1;
+
+    var material_count = 0;
+
+    for (var cell_i = 0; cell_i < 9; cell_i++)
     {
-        return 0;
+        if (lower_cells[cell_i] >= 0)
+        {
+            material_count++;
+        }
     }
 
+    if (material_count == 0) return -1;
 
-    if (!global.market_event_active)
+    return craft_v2_result_id(
+        preset_index,
+        get_dominant_group()
+    );
+};
+
+
+// =====================================================
+// FAILURE
+// =====================================================
+
+get_failure = function()
+{
+    if (get_current_item() == -1) return 100;
+
+    var material_count = 0;
+
+    for (var cell_i = 0; cell_i < 9; cell_i++)
     {
-        return 0;
+        if (lower_cells[cell_i] >= 0)
+        {
+            material_count++;
+        }
     }
 
+    var base = 40;
 
-    if (
-        !variable_global_exists(
-            "market_event_timer"
-        )
-    )
+    switch (material_count)
     {
-        return 0;
+        case 1: base = 1; break;
+        case 2: base = 10; break;
+        case 3: base = 20; break;
+        case 4: base = 30; break;
+        default: base = 40; break;
     }
 
+    base -= array_length(global.discovered_items) * 2;
 
-    var seconds_left =
-        ceil(
-            global.market_event_timer
-            /
-            room_speed
+    var market_bonus = 0;
+
+    if (script_exists(asset_get_index("scr_events")))
+    {
+        market_bonus = market_event_get_failure_bonus();
+    }
+
+    var connection_count = craft_v2_connections(
+        upper_modules,
+        get_lower_occupied()
+    );
+
+    base -= connection_count;
+    base += market_bonus;
+    base -= get_buff_rate(0);
+
+    return clamp(base, 0, 100);
+};
+
+
+// =====================================================
+// INITIAL PRESET
+// =====================================================
+
+apply_preset(0);
+// =====================================================
+// UNIFIED RECIPES
+// =====================================================
+
+recipe_catalog = craft_v2_recipes();
+
+
+// =====================================================
+// CURRENT RECIPE
+// =====================================================
+
+get_current_item = function()
+{
+    var category = craft_v2_match_preset(upper_modules);
+
+    return craft_v2_find_recipe(
+        category,
+        lower_cells,
+        resource_groups
+    );
+};
+
+
+// =====================================================
+// LOAD RECIPE FROM BOOK
+// =====================================================
+
+load_book_recipe = function()
+{
+    var recipe = recipe_catalog[selected_item];
+
+    // Load upper shape.
+    apply_preset(recipe.category);
+
+    // Preserve existing buffs where possible.
+    var saved_buffs = [];
+
+    for (var cell_i = 0; cell_i < 9; cell_i++)
+    {
+        if (lower_cells[cell_i] <= -2)
+        {
+            array_push(saved_buffs, lower_cells[cell_i]);
+        }
+    }
+
+    lower_cells = array_create(9, -1);
+
+    var ingredient_total = 0;
+
+    for (var ing_i = 0; ing_i < array_length(recipe.ingredients); ing_i++)
+    {
+        ingredient_total += recipe.ingredients[ing_i].amount;
+    }
+
+    // Use 8 resource slots for the ratio where possible.
+    var desired_slots = 8;
+    var used_slots = 0;
+
+    for (var ing_i = 0; ing_i < array_length(recipe.ingredients); ing_i++)
+    {
+        var ingredient = recipe.ingredients[ing_i];
+
+        var slots = round(
+            ingredient.amount / ingredient_total * desired_slots
         );
 
+        slots = max(1, slots);
 
-    if (seconds_left < 0)
-    {
-        seconds_left = 0;
+        if (ing_i == array_length(recipe.ingredients) - 1)
+        {
+            slots = max(1, desired_slots - used_slots);
+        }
+
+        var resource_index = -1;
+
+        for (var resource_i = 0; resource_i < array_length(resources); resource_i++)
+        {
+            if (resource_groups[resource_i] == ingredient.group)
+            {
+                resource_index = resource_i;
+                break;
+            }
+        }
+
+        if (resource_index == -1) continue;
+
+        for (var slot_i = 0; slot_i < slots; slot_i++)
+        {
+            if (used_slots >= 9) break;
+
+            lower_cells[used_slots] = resource_index;
+            used_slots++;
+        }
     }
 
+    // Place saved buffs in remaining free slots.
+    var buff_cursor = 8;
 
-    return seconds_left;
-};
-
-
-// =====================================================
-// FINAL FAILURE
-// =====================================================
-//
-// FINAL =
-//
-// BASE
-// - KNOWLEDGE
-// + MARKET EVENT
-// - FAIL BUFF
-//
-// Example:
-//
-// 5 ingredients
-// Base                40
-// 2 discovered        -4
-// MARKET PANIC       +15
-// FAIL buff          -10
-//
-// Final:
-// 40 - 4 + 15 - 10 = 41%
-//
-// Clamp:
-// 0% minimum
-// 100% maximum
-//
-// =====================================================
-
-get_craft_failure = function(_recipe_index)
-{
-    if (_recipe_index < 0)
+    for (var buff_i = 0; buff_i < array_length(saved_buffs); buff_i++)
     {
-        return -1;
+        while (buff_cursor >= 0 && lower_cells[buff_cursor] != -1)
+        {
+            buff_cursor--;
+        }
+
+        if (buff_cursor < 0) break;
+
+        lower_cells[buff_cursor] = saved_buffs[buff_i];
+        buff_cursor--;
     }
 
-
-    if (
-        _recipe_index >=
-        array_length(recipes)
-    )
-    {
-        return -1;
-    }
-
-
-    var ingredient_count =
-        array_length(
-            recipes[
-                _recipe_index
-            ].materials
-        );
-
-
-    var known_count =
-        get_discovered_count();
-
-
-    // -------------------------------------------------
-    // BASE - KNOWLEDGE
-    // -------------------------------------------------
-
-    var final_failure =
-        get_final_failure_chance(
-            ingredient_count,
-            known_count
-        );
-
-
-    // -------------------------------------------------
-    // MARKET EVENT
-    // -------------------------------------------------
-
-    final_failure +=
-        get_market_failure_bonus();
-
-
-    // -------------------------------------------------
-    // FAIL BUFF
-    // -------------------------------------------------
-
-    final_failure -=
-        get_buff_rate(0);
-
-
-    // -------------------------------------------------
-    // LIMIT 0..100
-    // -------------------------------------------------
-
-    if (final_failure < 0)
-    {
-        final_failure = 0;
-    }
-
-
-    if (final_failure > 100)
-    {
-        final_failure = 100;
-    }
-
-
-    return final_failure;
+    craft_result = 0;
+    craft_note = "LOADED: " + recipe.name;
 };
