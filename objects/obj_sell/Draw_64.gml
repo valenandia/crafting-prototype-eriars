@@ -1,566 +1,262 @@
 /// obj_sell - Draw GUI Event
-
-
-// =====================================================
-// ONLY DRAW ON ECONOMY SCREEN
-// =====================================================
+/// UNIFIED ITEM SELL SYSTEM V3.3
 
 if (global.ui_screen != 0)
 {
     exit;
 }
 
-
 draw_set_font(fnt_ui_small);
+draw_set_halign(fa_left);
+draw_set_valign(fa_top);
 draw_set_alpha(1);
-
 
 // =====================================================
 // COLORS
 // =====================================================
 
-var panel_color =
-    make_color_rgb(
-        37,
-        44,
-        56
-    );
-
-var card_color =
-    make_color_rgb(
-        70,
-        84,
-        103
-    );
-
-var purple_color =
-    make_color_rgb(
-        124,
-        86,
-        170
-    );
-
-var disabled_color =
-    make_color_rgb(
-        70,
-        75,
-        85
-    );
-
-var muted_color =
-    make_color_rgb(
-        170,
-        180,
-        195
-    );
-
-var green_color =
-    make_color_rgb(
-        100,
-        220,
-        140
-    );
-
+var panel_color = make_color_rgb(37,44,56);
+var row_color = make_color_rgb(61,73,90);
+var purple = make_color_rgb(124,86,170);
+var green = make_color_rgb(100,220,140);
+var yellow = make_color_rgb(235,203,81);
+var muted = make_color_rgb(160,170,185);
+var bg = make_color_rgb(24,29,38);
 
 // =====================================================
 // DATA
 // =====================================================
 
-var recipe_count =
-    array_length(
-        global.recipes
-    );
-
-
-if (recipe_count <= 0)
-{
-    draw_set_font(-1);
-    draw_set_color(c_white);
-    draw_set_alpha(1);
-    exit;
-}
-
-
-sell_item_index =
-    clamp(
-        sell_item_index,
-        0,
-        recipe_count - 1
-    );
-
-
-var sell_recipe =
-    global.recipes[
-        sell_item_index
-    ];
-
-
-var item_key =
-    sell_recipe.id;
-
-
-var item_amount =
-    0;
-
-
-if (
-    variable_struct_exists(
-        global.item_inventory,
-        item_key
-    )
-)
-{
-    item_amount =
-        variable_struct_get(
-            global.item_inventory,
-            item_key
-        );
-}
-
-
-// =====================================================
-// MARKET VALUES
-// =====================================================
-
-var fantasy_mult =
-    market_get_item_multiplier(
-        sell_recipe,
-        "FANTASY"
-    );
-
-
-var cyber_mult =
-    market_get_item_multiplier(
-        sell_recipe,
-        "CYBERPUNK"
-    );
-
-
-var steam_mult =
-    market_get_item_multiplier(
-        sell_recipe,
-        "STEAMPUNK"
-    );
-
-
-var fantasy_price =
-    get_item_world_sell_price(
-        sell_recipe,
-        "FANTASY"
-    );
-
-
-var cyber_price =
-    get_item_world_sell_price(
-        sell_recipe,
-        "CYBERPUNK"
-    );
-
-
-var steam_price =
-    get_item_world_sell_price(
-        sell_recipe,
-        "STEAMPUNK"
-    );
-
+var recipe = recipes[selected_item];
+var stacks = get_selected_stacks();
+var owned = get_selected_owned();
 
 // =====================================================
 // PANEL
 // =====================================================
 
-draw_set_color(
-    panel_color
-);
+draw_set_color(panel_color);
 
 draw_rectangle(
-    sell_x,
-    sell_y,
-    sell_x + sell_panel_w,
-    sell_y + sell_panel_h,
+    panel_x,
+    panel_y,
+    panel_x + panel_w,
+    panel_y + panel_h,
     false
 );
 
+// =====================================================
+// HEADER
+// =====================================================
 
 draw_set_color(c_white);
 
 draw_text(
-    sell_x + 20,
-    sell_y + 17,
-    "SELL CRAFTED ITEM"
+    panel_x + 20,
+    panel_y + 15,
+    "ITEM MARKET - QUALITY TRADING"
 );
 
+draw_set_color(yellow);
 
-// =====================================================
-// ITEM HEADER
-// =====================================================
-
-draw_set_color(
-    card_color
+draw_text(
+    panel_x + 375,
+    panel_y + 15,
+    string(global.credits) + " CR"
 );
+
+// =====================================================
+// SELECTED ITEM
+// =====================================================
+
+draw_set_color(c_white);
+
+draw_text(
+    panel_x + 20,
+    panel_y + 47,
+    recipe.name
+);
+
+draw_set_color(muted);
+
+draw_text(
+    panel_x + 370,
+    panel_y + 47,
+    "OWNED: " + string(owned)
+);
+
+// =====================================================
+// NAVIGATION
+// =====================================================
+
+draw_set_color(row_color);
 
 draw_rectangle(
-    sell_x + 20,
-    sell_y + 52,
-    sell_x + 430,
-    sell_y + 100,
+    panel_x + 20,
+    panel_y + 75,
+    panel_x + 125,
+    panel_y + 110,
     false
 );
 
-
-// =====================================================
-// ITEM NAME
-// =====================================================
-
-draw_set_color(c_white);
-
-draw_text(
-    sell_x + 35,
-    sell_y + 68,
-    sell_recipe.name
-);
-
-
-// =====================================================
-// OWNED
-// =====================================================
-
-if (item_amount > 0)
-{
-    draw_set_color(
-        green_color
-    );
-}
-else
-{
-    draw_set_color(
-        muted_color
-    );
-}
-
-
-draw_text(
-    sell_x + 300,
-    sell_y + 68,
-
-    "OWNED: "
-    +
-    string(
-        item_amount
-    )
-);
-
-
-// =====================================================
-// ITEM NUMBER / NAVIGATION HINT
-// =====================================================
-
-draw_set_color(
-    muted_color
-);
-
-draw_text(
-    sell_x + 35,
-    sell_y + 87,
-
-    "< "
-    +
-    string(
-        sell_item_index + 1
-    )
-    +
-    " / "
-    +
-    string(
-        recipe_count
-    )
-    +
-    " >"
-);
-
-
-// =====================================================
-// FANTASY
-// =====================================================
-
-draw_set_color(
-    card_color
-);
-
 draw_rectangle(
-    sell_x + 20,
-    sell_y + 115,
-    sell_x + 430,
-    sell_y + 175,
+    panel_x + 425,
+    panel_y + 75,
+    panel_x + 530,
+    panel_y + 110,
     false
 );
 
-
 draw_set_color(c_white);
+draw_text(panel_x + 44, panel_y + 86, "< PREV");
+draw_text(panel_x + 447, panel_y + 86, "NEXT >");
+
+draw_set_color(muted);
 
 draw_text(
-    sell_x + 35,
-    sell_y + 137,
-    "FANTASY"
+    panel_x + 230,
+    panel_y + 86,
+    string(selected_item + 1) +
+    " / " + string(array_length(recipes))
 );
 
+// =====================================================
+// STACK HEADERS
+// =====================================================
 
-draw_set_color(
-    muted_color
-);
+draw_set_color(muted);
 
-draw_text(
-    sell_x + 150,
-    sell_y + 137,
+draw_text(panel_x + 30, panel_y + 116, "QUALITY");
+draw_text(panel_x + 295, panel_y + 116, "OWNED");
+draw_text(panel_x + 405, panel_y + 116, "PRICE");
 
-    "x"
-    +
-    string(
-        fantasy_mult
-    )
-);
+// =====================================================
+// STACK ROWS
+// =====================================================
 
-
-draw_set_color(
-    c_yellow
-);
-
-draw_text(
-    sell_x + 230,
-    sell_y + 137,
-
-    string(
-        fantasy_price
-    )
-);
-
-
-if (item_amount > 0)
+if (array_length(stacks) == 0)
 {
-    draw_set_color(
-        purple_color
-    );
-}
-else
-{
-    draw_set_color(
-        disabled_color
+    draw_set_color(muted);
+
+    draw_text(
+        panel_x + 30,
+        panel_y + 160,
+        "NO ITEMS AVAILABLE"
     );
 }
 
+for (var row_i = 0; row_i < visible_stacks; row_i++)
+{
+    var stack_index = stack_scroll + row_i;
+
+    if (stack_index >= array_length(stacks))
+    {
+        break;
+    }
+
+    var stack = stacks[stack_index];
+    var row_y = panel_y + 130 + row_i * 31;
+
+    if (selected_stack == stack_index)
+    {
+        draw_set_color(purple);
+    }
+    else
+    {
+        draw_set_color(row_color);
+    }
+
+    draw_rectangle(
+        panel_x + 20,
+        row_y,
+        panel_x + 530,
+        row_y + 27,
+        false
+    );
+
+    // Rarity
+    draw_set_color(
+        craft_v3_rarity_color(stack.quality)
+    );
+
+    draw_text(
+        panel_x + 30,
+        row_y + 7,
+        craft_v3_rarity_name(stack.quality) +
+        " Q" + string(stack.quality)
+    );
+
+    // Count
+    draw_set_color(c_white);
+
+    draw_text(
+        panel_x + 300,
+        row_y + 7,
+        "x" + string(stack.amount)
+    );
+
+    // Price
+    draw_set_color(green);
+
+    draw_text(
+        panel_x + 405,
+        row_y + 7,
+        string(
+            craft_v3_sell_price(
+                selected_item,
+                stack.quality
+            )
+        ) + " CR"
+    );
+}
+
+// =====================================================
+// SELL BUTTON
+// =====================================================
+
+draw_set_color(purple);
 
 draw_rectangle(
-    fantasy_button_x1,
-    fantasy_button_y1,
-    fantasy_button_x2,
-    fantasy_button_y2,
+    panel_x + 20,
+    panel_y + 300,
+    panel_x + 530,
+    panel_y + 340,
     false
 );
 
-
 draw_set_color(c_white);
 
 draw_text(
-    fantasy_button_x1 + 30,
-    fantasy_button_y1 + 10,
-    "SELL"
+    panel_x + 230,
+    panel_y + 313,
+    "SELL x1"
 );
-
 
 // =====================================================
-// CYBERPUNK
+// MESSAGE
 // =====================================================
 
-draw_set_color(
-    card_color
-);
+draw_set_color(yellow);
 
-draw_rectangle(
-    sell_x + 20,
-    sell_y + 180,
-    sell_x + 430,
-    sell_y + 240,
-    false
-);
+var display_message = sell_message;
 
-
-draw_set_color(c_white);
-
-draw_text(
-    sell_x + 35,
-    sell_y + 202,
-    "CYBERPUNK"
-);
-
-
-draw_set_color(
-    muted_color
-);
-
-draw_text(
-    sell_x + 150,
-    sell_y + 202,
-
-    "x"
-    +
-    string(
-        cyber_mult
-    )
-);
-
-
-draw_set_color(
-    c_yellow
-);
-
-draw_text(
-    sell_x + 230,
-    sell_y + 202,
-
-    string(
-        cyber_price
-    )
-);
-
-
-if (item_amount > 0)
+if (string_length(display_message) > 65)
 {
-    draw_set_color(
-        purple_color
-    );
-}
-else
-{
-    draw_set_color(
-        disabled_color
-    );
+    display_message =
+        string_copy(display_message,1,62) + "...";
 }
 
-
-draw_rectangle(
-    cyber_button_x1,
-    cyber_button_y1,
-    cyber_button_x2,
-    cyber_button_y2,
-    false
-);
-
-
-draw_set_color(c_white);
-
 draw_text(
-    cyber_button_x1 + 30,
-    cyber_button_y1 + 10,
-    "SELL"
+    panel_x + 20,
+    panel_y + 348,
+    display_message
 );
-
 
 // =====================================================
-// STEAMPUNK
+// RESET
 // =====================================================
 
-draw_set_color(
-    card_color
-);
-
-draw_rectangle(
-    sell_x + 20,
-    sell_y + 245,
-    sell_x + 430,
-    sell_y + 305,
-    false
-);
-
-
-draw_set_color(c_white);
-
-draw_text(
-    sell_x + 35,
-    sell_y + 267,
-    "STEAMPUNK"
-);
-
-
-draw_set_color(
-    muted_color
-);
-
-draw_text(
-    sell_x + 150,
-    sell_y + 267,
-
-    "x"
-    +
-    string(
-        steam_mult
-    )
-);
-
-
-draw_set_color(
-    c_yellow
-);
-
-draw_text(
-    sell_x + 230,
-    sell_y + 267,
-
-    string(
-        steam_price
-    )
-);
-
-
-if (item_amount > 0)
-{
-    draw_set_color(
-        purple_color
-    );
-}
-else
-{
-    draw_set_color(
-        disabled_color
-    );
-}
-
-
-draw_rectangle(
-    steam_button_x1,
-    steam_button_y1,
-    steam_button_x2,
-    steam_button_y2,
-    false
-);
-
-
-draw_set_color(c_white);
-
-draw_text(
-    steam_button_x1 + 30,
-    steam_button_y1 + 10,
-    "SELL"
-);
-
-
-// =====================================================
-// RESULT
-// =====================================================
-
-draw_set_color(
-    green_color
-);
-
-draw_text(
-    sell_x + 20,
-    sell_y + 315,
-    sell_result
-);
-
-
-// =====================================================
-// RESET DRAW STATE
-// =====================================================
-
-draw_set_font(-1);
-draw_set_color(c_white);
 draw_set_alpha(1);
+draw_set_color(c_white);
+draw_set_halign(fa_left);
+draw_set_valign(fa_top);

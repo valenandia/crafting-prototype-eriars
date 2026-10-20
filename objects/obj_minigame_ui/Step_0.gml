@@ -1,587 +1,307 @@
-/// obj_minigame_ui - Step Event
+
+/// obj_minigame_ui - STEP
+/// CRAFTING V4.4
+/// ALL PANELS SHIFTED UP BY 70 PIXELS
 
 if (global.ui_screen != 1) exit;
 
+// Convert mouse position into original UI coordinates.
 var mx = device_mouse_x_to_gui(0);
-var my = device_mouse_y_to_gui(0);
+var my = device_mouse_y_to_gui(0) - ui_shift_y;
 
-var left_pressed = mouse_check_button_pressed(mb_left);
-var left_released = mouse_check_button_released(mb_left);
-var right_pressed = mouse_check_button_pressed(mb_right);
+var click = mouse_check_button_pressed(mb_left);
+var release = mouse_check_button_released(mb_left);
+var right_click = mouse_check_button_pressed(mb_right);
+var handled = false;
 
+if (craft_result != 0 && current_time > result_until)
+    craft_result = 0;
 
-// =====================================================
-// SCROLL
-// =====================================================
-
-if (
-    mx >= ui.pool_x &&
-    mx <= ui.pool_x + ui.pool_w &&
-    my >= ui.pool_y &&
-    my <= 815
-)
+// ANALYZER OPEN / CLOSE
+if (click && !handled
+&& mx >= ui.analyzer_x
+&& mx <= ui.analyzer_x + ui.analyzer_w
+&& my >= ui.analyzer_y
+&& my <= ui.analyzer_y + 35)
 {
-    var max_scroll = max(
-        0,
-        array_length(resources) - visible_rows
-    );
-
-    if (mouse_wheel_down())
-        resource_scroll = min(max_scroll, resource_scroll + 1);
-
-    if (mouse_wheel_up())
-        resource_scroll = max(0, resource_scroll - 1);
+    analyzer_open = !analyzer_open;
+    handled = true;
 }
 
-
-// =====================================================
-// RIGHT CLICK REMOVE
-// =====================================================
-
-if (right_pressed)
+// RANDOM
+if (click && !handled
+&& mx >= ui.random_x
+&& mx <= ui.random_x + ui.random_w
+&& my >= ui.random_y
+&& my <= ui.random_y + ui.random_h)
 {
-    var clear_upper = get_upper_cell(mx, my);
-    var clear_lower = get_lower_cell(mx, my);
-
-    if (clear_upper != -1)
-    {
-        upper_modules[clear_upper] = -1;
-        craft_result = 0;
-    }
-
-    if (clear_lower != -1)
-    {
-        lower_cells[clear_lower] = -1;
-        craft_result = 0;
-    }
+    randomize_craft();
+    handled = true;
 }
 
-
-// =====================================================
-// START LEFT CLICK
-// =====================================================
-
-if (left_pressed)
+// CRAFT
+if (click && !handled
+&& mx >= ui.craft_x
+&& mx <= ui.craft_x + ui.craft_w
+&& my >= ui.craft_y
+&& my <= ui.craft_y + ui.craft_h)
 {
-    drag_active = false;
-    drag_started = false;
-    drag_origin_panel = 0;
-    drag_origin_cell = -1;
+    craft_current();
+    handled = true;
+}
 
-    drag_start_x = mx;
-    drag_start_y = my;
-
-    var handled = false;
-
-
-    // PRESETS
-
-    for (var preset_i = 0; preset_i < array_length(presets); preset_i++)
+// CATEGORY PRESETS
+if (click && !handled)
+{
+    for (var ci = 0; ci < array_length(categories); ci++)
     {
-        var preset_y =
-            ui.preset_y +
-            preset_i * (ui.preset_h + 8);
+        var cc = ci mod 2;
+        var cr = ci div 2;
+        var px = ui.preset_x + cc * 135;
+        var py = ui.preset_y + cr * ui.preset_step;
 
-        if (
-            mx >= ui.preset_x &&
-            mx <= ui.preset_x + ui.preset_w &&
-            my >= preset_y &&
-            my <= preset_y + ui.preset_h
-        )
+        if (mx >= px && mx <= px + 125
+        && my >= py && my <= py + ui.preset_h)
         {
-            apply_preset(preset_i);
+            load_category_shape(ci);
             handled = true;
             break;
         }
     }
-
-
-    // MODULE SOURCE
-
-    if (!handled)
-    {
-        for (var module_i = 0; module_i < 3; module_i++)
-        {
-            var module_y =
-                ui.module_y + module_i * ui.module_step;
-
-            if (
-                mx >= ui.module_x &&
-                mx <= ui.module_x + 120 &&
-                my >= module_y &&
-                my <= module_y + 44
-            )
-            {
-                selected_kind = 1;
-                selected_value = module_i;
-
-                drag_active = true;
-                drag_kind = 1;
-                drag_value = module_i;
-
-                handled = true;
-                break;
-            }
-        }
-    }
-
-
-    // BUFF SOURCE
-
-    if (!handled)
-    {
-        for (var buff_i = 0; buff_i < 3; buff_i++)
-        {
-            var buff_x = 405 + buff_i * 58;
-
-            if (
-                mx >= buff_x &&
-                mx <= buff_x + 52 &&
-                my >= ui.buff_y &&
-                my <= ui.buff_y + 42
-            )
-            {
-                selected_kind = 3;
-                selected_value = -2 - buff_i;
-
-                drag_active = true;
-                drag_kind = 3;
-                drag_value = selected_value;
-
-                handled = true;
-                break;
-            }
-        }
-    }
-
-
-    // RESOURCE SOURCE
-
-    if (!handled)
-    {
-        for (var row_i = 0; row_i < visible_rows; row_i++)
-        {
-            var resource_index = resource_scroll + row_i;
-
-            if (resource_index >= array_length(resources)) break;
-
-            var row_y = ui.resource_y + row_i * ui.resource_step;
-
-            if (
-                mx >= ui.pool_x + 15 &&
-                mx <= ui.pool_x + ui.pool_w - 15 &&
-                my >= row_y &&
-                my <= row_y + 40
-            )
-            {
-                selected_kind = 2;
-                selected_value = resource_index;
-
-                drag_active = true;
-                drag_kind = 2;
-                drag_value = resource_index;
-
-                handled = true;
-                break;
-            }
-        }
-    }
-
-
-    // UPPER GRID
-
-    if (!handled)
-    {
-        var upper_cell = get_upper_cell(mx, my);
-
-        if (upper_cell != -1)
-        {
-            if (upper_modules[upper_cell] != -1)
-            {
-                drag_active = true;
-                drag_kind = 1;
-                drag_value = upper_modules[upper_cell];
-
-                drag_origin_panel = 1;
-                drag_origin_cell = upper_cell;
-            }
-            else if (selected_kind == 1)
-            {
-                upper_modules[upper_cell] = selected_value;
-            }
-
-            handled = true;
-        }
-    }
-
-
-    // LOWER GRID
-
-    if (!handled)
-    {
-        var lower_cell = get_lower_cell(mx, my);
-
-        if (lower_cell != -1)
-        {
-            if (lower_cells[lower_cell] != -1)
-            {
-                drag_active = true;
-
-                drag_value = lower_cells[lower_cell];
-
-                if (drag_value >= 0)
-                    drag_kind = 2;
-                else
-                    drag_kind = 3;
-
-                drag_origin_panel = 2;
-                drag_origin_cell = lower_cell;
-            }
-            else if (selected_kind == 2 || selected_kind == 3)
-            {
-                if (selected_kind == 3)
-                {
-                    for (var unique_i = 0; unique_i < 9; unique_i++)
-                    {
-                        if (lower_cells[unique_i] == selected_value)
-                            lower_cells[unique_i] = -1;
-                    }
-                }
-
-                lower_cells[lower_cell] = selected_value;
-            }
-
-            handled = true;
-        }
-    }
-
-
-    // RESET
-
-    if (
-        !handled &&
-        mx >= 430 && mx <= 550 &&
-        my >= 835 && my <= 877
-    )
-    {
-        upper_modules = array_create(6, -1);
-        lower_cells = array_create(9, -1);
-
-        selected_kind = 0;
-        selected_value = -1;
-
-        craft_result = 0;
-        craft_note = "GRID RESET";
-
-        handled = true;
-    }
-
-
-    // BOOK NAVIGATION
-
-    if (
-        !handled &&
-        my >= 730 && my <= 775 &&
-        mx >= ui.book_x &&
-        mx <= ui.book_x + ui.book_w
-    )
-    {
-        if (mx < ui.book_x + ui.book_w * 0.5)
-            selected_item = (selected_item + 19) mod 20;
-        else
-            selected_item = (selected_item + 1) mod 20;
-
-        handled = true;
-    }
-
-// =====================================================
-// LOAD RECIPE BUTTON
-// =====================================================
-
-if (
-    !handled &&
-    mx >= ui.book_x + 20 &&
-    mx <= ui.book_x + ui.book_w - 20 &&
-    my >= 665 &&
-    my <= 700
-)
-{
-    load_book_recipe();
-    handled = true;
 }
-    // CRAFT
 
-    if (
-        !handled &&
-        mx >= ui.craft_x &&
-        mx <= ui.craft_x + ui.craft_w &&
-        my >= ui.craft_y &&
-        my <= ui.craft_y + ui.craft_h
-    )
+// MANUAL MODULE GRID
+if ((click || right_click) && !handled)
+{
+    for (var ci = 0; ci < 6; ci++)
     {
-        var item_index = get_current_item();
+        var cc = ci mod 3;
+        var cr = ci div 3;
+        var px = ui.upper_x + cc * ui.upper_cell;
+        var py = ui.upper_y + cr * ui.upper_cell;
 
-        if (item_index == -1)
+        if (mx >= px && mx <= px + ui.upper_cell - 6
+        && my >= py && my <= py + ui.upper_cell - 6)
         {
+            if (right_click)
+            {
+                upper_modules[ci] = -1;
+            }
+            else
+            {
+                switch (upper_modules[ci])
+                {
+                    case -1: upper_modules[ci] = 0; break;
+                    case 0: upper_modules[ci] = 1; break;
+                    case 1: upper_modules[ci] = 2; break;
+                    default: upper_modules[ci] = -1; break;
+                }
+            }
+
+            update_detected_category();
+
             craft_result = 0;
-            craft_note = "INVALID COMBINATION";
+            craft_note = "MODULE SHAPE UPDATED";
+
+            handled = true;
+            break;
         }
-        else
+    }
+}
+
+// RESOURCE SELECTION
+if (click && !handled)
+{
+    for (var gi = 0; gi < 8; gi++)
+    {
+        var cc = gi mod 4;
+        var cr = gi div 4;
+        var px = ui.pool_x + 12 + cc * 80;
+        var py = ui.pool_y + 82 + cr * 90;
+
+        if (mx >= px && mx <= px + 74
+        && my >= py && my <= py + 78)
         {
-            var group_names = [
-                "stone", "polyester", "tree", "cloth",
-                "glass", "jewels", "mushrooms", "blood"
-            ];
+            selected_group = gi;
+            selected_variant = min(
+                selected_variant,
+                variant_counts[gi]
+            );
 
-            var requirements = array_create(8, 0);
+            drag_active = true;
+            drag_group = gi;
+            drag_variant = selected_variant;
+            drag_start_x = mx;
+            drag_start_y = my;
 
-            for (var cell_i = 0; cell_i < 9; cell_i++)
-            {
-                var resource_index = lower_cells[cell_i];
-
-                if (resource_index < 0) continue;
-
-                var resource_group = resource_groups[resource_index];
-
-                for (var group_i = 0; group_i < 8; group_i++)
-                {
-                    if (group_names[group_i] == resource_group)
-                    {
-                        requirements[group_i] += 10;
-                        break;
-                    }
-                }
-            }
-
-            var enough = true;
-
-            for (var check_i = 0; check_i < 8; check_i++)
-            {
-                if (
-                    get_pool_amount(group_names[check_i]) <
-                    requirements[check_i]
-                )
-                {
-                    enough = false;
-                    break;
-                }
-            }
-
-            if (!enough)
-            {
-                craft_result = 0;
-                craft_note = "NOT ENOUGH MATERIALS";
-            }
-            else
-            {
-                for (var spend_i = 0; spend_i < 8; spend_i++)
-                {
-                    if (requirements[spend_i] > 0)
-                    {
-                        change_pool_amount(
-                            group_names[spend_i],
-                            -requirements[spend_i]
-                        );
-                    }
-                }
-
-                global.craft_attempts++;
-
-                var failure_chance = get_failure();
-
-                if (random(100) < failure_chance)
-                {
-                    craft_result = 2;
-                    craft_note = "CRAFT FAILED";
-                }
-                else
-                {
-                    craft_result = 1;
-
-                    craft_v2_add_item(item_index);
-
-                    var item_id =
-                        "item_" +
-                        string_format(item_index + 1, 2, 0);
-
-                    var already_known = false;
-
-                    for (var known_i = 0;
-                         known_i < array_length(global.discovered_items);
-                         known_i++)
-                    {
-                        if (global.discovered_items[known_i] == item_id)
-                        {
-                            already_known = true;
-                            break;
-                        }
-                    }
-
-                    if (!already_known)
-                        array_push(global.discovered_items, item_id);
-
-                    craft_note = "+1 " + item_names[item_index];
-                }
-
-                // BACK
-
-                if (random(100) < get_buff_rate(1))
-                {
-                    var available_groups = [];
-
-                    for (var back_i = 0; back_i < 8; back_i++)
-                    {
-                        if (requirements[back_i] > 0)
-                            array_push(available_groups, back_i);
-                    }
-
-                    if (array_length(available_groups) > 0)
-                    {
-                        var chosen_group = available_groups[
-                            irandom(array_length(available_groups) - 1)
-                        ];
-
-                        change_pool_amount(
-                            group_names[chosen_group],
-                            10
-                        );
-
-                        craft_note += " | BACK +10";
-                    }
-                }
-
-                // FIND
-
-                if (random(100) < get_buff_rate(2))
-                {
-                    var unknown_items = [];
-
-                    for (var find_i = 0; find_i < 20; find_i++)
-                    {
-                        var find_id =
-                            "item_" +
-                            string_format(find_i + 1, 2, 0);
-
-                        var known = false;
-
-                        for (var discovered_i = 0;
-                             discovered_i < array_length(global.discovered_items);
-                             discovered_i++)
-                        {
-                            if (global.discovered_items[discovered_i] == find_id)
-                            {
-                                known = true;
-                                break;
-                            }
-                        }
-
-                        if (!known)
-                            array_push(unknown_items, find_i);
-                    }
-
-                    if (array_length(unknown_items) > 0)
-                    {
-                        var found_index = unknown_items[
-                            irandom(array_length(unknown_items) - 1)
-                        ];
-
-                        var found_id =
-                            "item_" +
-                            string_format(found_index + 1, 2, 0);
-
-                        array_push(global.discovered_items, found_id);
-
-                        selected_item = found_index;
-
-                        craft_note +=
-                            " | FOUND: " + item_names[found_index];
-                    }
-                }
-            }
+            handled = true;
+            break;
         }
+    }
+}
+
+// VARIANT ARROWS
+if (click && !handled && my >= 505 && my <= 545)
+{
+    if (mx >= 44 && mx <= 94)
+    {
+        selected_variant--;
+
+        if (selected_variant < 1)
+            selected_variant = variant_counts[selected_group];
+
+        handled = true;
+    }
+    else if (mx >= 286 && mx <= 336)
+    {
+        selected_variant++;
+
+        if (selected_variant > variant_counts[selected_group])
+            selected_variant = 1;
 
         handled = true;
     }
 }
 
-
-// =====================================================
-// DRAG DETECTION
-// =====================================================
-
-if (drag_active && mouse_check_button(mb_left))
+// ADD / REMOVE / CLEAR
+if (click && !handled)
 {
-    if (point_distance(mx, my, drag_start_x, drag_start_y) > 8)
-        drag_started = true;
+    var group_name = groups[selected_group];
+
+    if (mx >= 44 && mx <= 144
+    && my >= 580 && my <= 625)
+    {
+        add_to_vessel(
+            group_name, selected_variant, add_amount
+        );
+        handled = true;
+    }
+    else if (mx >= 154 && mx <= 254
+    && my >= 580 && my <= 625)
+    {
+        remove_from_vessel(
+            group_name, selected_variant, add_amount
+        );
+        handled = true;
+    }
+    else if (mx >= 44 && mx <= 344
+    && my >= 646 && my <= 691)
+    {
+        clear_vessel();
+        handled = true;
+    }
 }
 
-
-// =====================================================
-// DROP / SWAP
-// =====================================================
-
-if (left_released && drag_active)
+// DRAG TO VESSEL
+if (release && drag_active)
 {
-    if (drag_started)
+    if (mx >= ui.vessel_x
+    && mx <= ui.vessel_x + ui.vessel_w
+    && my >= ui.vessel_y
+    && my <= ui.vessel_y + ui.vessel_h)
     {
-        var drop_upper = get_upper_cell(mx, my);
-        var drop_lower = get_lower_cell(mx, my);
-
-        if (drag_kind == 1 && drop_upper != -1)
-        {
-            if (drag_origin_panel == 1)
-            {
-                var old_module = upper_modules[drop_upper];
-
-                upper_modules[drop_upper] =
-                    upper_modules[drag_origin_cell];
-
-                upper_modules[drag_origin_cell] =
-                    old_module;
-            }
-            else
-            {
-                upper_modules[drop_upper] = drag_value;
-            }
-        }
-
-        if (
-            (drag_kind == 2 || drag_kind == 3) &&
-            drop_lower != -1
-        )
-        {
-            if (drag_origin_panel == 2)
-            {
-                var old_lower = lower_cells[drop_lower];
-
-                lower_cells[drop_lower] =
-                    lower_cells[drag_origin_cell];
-
-                lower_cells[drag_origin_cell] =
-                    old_lower;
-            }
-            else
-            {
-                if (drag_kind == 3)
-                {
-                    for (var buff_clear_i = 0;
-                         buff_clear_i < 9;
-                         buff_clear_i++)
-                    {
-                        if (lower_cells[buff_clear_i] == drag_value)
-                            lower_cells[buff_clear_i] = -1;
-                    }
-                }
-
-                lower_cells[drop_lower] = drag_value;
-            }
-        }
-
-        craft_result = 0;
+        add_to_vessel(
+            groups[drag_group],
+            drag_variant,
+            add_amount
+        );
     }
 
     drag_active = false;
-    drag_started = false;
-    drag_origin_panel = 0;
-    drag_origin_cell = -1;
+    drag_group = -1;
+}
+
+// BUFF SELECTORS
+if (click && !handled)
+{
+    for (var bi = 0; bi < 3; bi++)
+    {
+        var px = 1210 + bi * 112;
+
+        if (mx >= px && mx <= px + 100
+        && my >= 710 && my <= 746)
+        {
+            selected_buff = bi;
+            handled = true;
+            break;
+        }
+    }
+}
+
+// BUFF GRID
+if ((click || right_click) && !handled)
+{
+    for (var ci = 0; ci < 9; ci++)
+    {
+        var cc = ci mod 3;
+        var cr = ci div 3;
+        var px = ui.buff_x + cc * ui.buff_cell;
+        var py = ui.buff_y + cr * ui.buff_cell;
+
+        if (mx >= px && mx <= px + ui.buff_cell - 3
+        && my >= py && my <= py + ui.buff_cell - 3)
+        {
+            buff_cells[ci] =
+                right_click ? -1 : selected_buff;
+
+            handled = true;
+            break;
+        }
+    }
+}
+
+// ITEM BOOK TOGGLE
+if (click && !handled
+&& mx >= ui.book_x
+&& mx <= ui.book_x + ui.book_w
+&& my >= ui.book_y
+&& my <= ui.book_y + 42)
+{
+    book_open = !book_open;
+    handled = true;
+}
+
+// ITEM BOOK CONTROLS
+if (click && !handled && book_open)
+{
+    if (mx >= 1020 && mx <= 1220
+    && my >= 475 && my <= 500)
+    {
+        ingredients_open = !ingredients_open;
+        handled = true;
+    }
+
+    if (!handled && my >= 550 && my <= 586)
+    {
+        if (mx >= 1020 && mx <= 1130)
+        {
+            selected_recipe =
+                (selected_recipe + array_length(recipes) - 1)
+                mod array_length(recipes);
+            handled = true;
+        }
+        else if (mx >= 1445 && mx <= 1555)
+        {
+            selected_recipe =
+                (selected_recipe + 1)
+                mod array_length(recipes);
+            handled = true;
+        }
+    }
+
+    if (!handled
+    && mx >= 1020 && mx <= 1275
+    && my >= 600 && my <= 638)
+    {
+        load_recipe(selected_recipe, false);
+        handled = true;
+    }
+
+    if (!handled
+    && mx >= 1290 && mx <= 1555
+    && my >= 600 && my <= 638)
+    {
+        load_recipe(selected_recipe, true);
+        handled = true;
+    }
 }

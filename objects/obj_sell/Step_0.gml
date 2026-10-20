@@ -1,403 +1,159 @@
 /// obj_sell - Step Event
+/// UNIFIED ITEM SELL SYSTEM V3.3
 
-
-// =====================================================
-// ONLY INTERACT ON ECONOMY SCREEN
-// =====================================================
-
-if (global.ui_screen == 0)
+if (global.ui_screen != 0)
 {
-    var mouse_gui_x =
-        device_mouse_x_to_gui(0);
+    exit;
+}
 
-    var mouse_gui_y =
-        device_mouse_y_to_gui(0);
+// =====================================================
+// TIMER
+// =====================================================
 
+if (sell_result_timer > 0)
+{
+    sell_result_timer--;
+}
 
-    var recipe_count =
-        array_length(
-            global.recipes
-        );
+// =====================================================
+// MOUSE
+// =====================================================
 
+var mx = device_mouse_x_to_gui(0);
+var my = device_mouse_y_to_gui(0);
 
-    // =================================================
-    // SAFETY
-    // =====================================================
+var click = mouse_check_button_pressed(mb_left);
 
-    if (recipe_count > 0)
+var recipes_count = array_length(recipes);
+
+// =====================================================
+// SCROLL QUALITY STACKS
+// =====================================================
+
+var stacks = get_selected_stacks();
+
+if (
+    mx >= panel_x &&
+    mx <= panel_x + panel_w &&
+    my >= panel_y + 125 &&
+    my <= panel_y + 285
+)
+{
+    var wheel = 0;
+
+    if (mouse_wheel_up())
     {
-        sell_item_index =
-            clamp(
-                sell_item_index,
-                0,
-                recipe_count - 1
-            );
-
-
-        // =================================================
-        // IS MOUSE OVER SELL PANEL?
-        // =====================================================
-
-        var mouse_over_sell_panel =
-            mouse_gui_x >= sell_x
-            &&
-            mouse_gui_x <=
-                sell_x + sell_panel_w
-            &&
-            mouse_gui_y >= sell_y
-            &&
-            mouse_gui_y <=
-                sell_y + sell_panel_h;
-
-
-        // =================================================
-        // MOUSE WHEEL
-        // =====================================================
-        //
-        // Wheel only changes Sell item while the cursor
-        // is over the Sell Crafted Item panel.
-        //
-        // Wheel down = next
-        // Wheel up   = previous
-        //
-        // Wraps:
-        // Item 20 -> Item 01
-        // Item 01 -> Item 20
-        //
-        // =================================================
-
-        if (mouse_over_sell_panel)
-        {
-            if (mouse_wheel_down())
-            {
-                sell_item_index += 1;
-
-
-                if (
-                    sell_item_index >=
-                    recipe_count
-                )
-                {
-                    sell_item_index = 0;
-                }
-
-
-                sell_result =
-                    "Choose a market.";
-            }
-
-
-            if (mouse_wheel_up())
-            {
-                sell_item_index -= 1;
-
-
-                if (sell_item_index < 0)
-                {
-                    sell_item_index =
-                        recipe_count - 1;
-                }
-
-
-                sell_result =
-                    "Choose a market.";
-            }
-        }
-
-
-        // =================================================
-        // KEYBOARD NAVIGATION
-        // =====================================================
-        //
-        // LEFT / UP  = previous item
-        // RIGHT/DOWN = next item
-        //
-        // Only while Economy screen is open.
-        //
-        // =================================================
-
-        if (
-            keyboard_check_pressed(
-                vk_right
-            )
-            ||
-            keyboard_check_pressed(
-                vk_down
-            )
-        )
-        {
-            sell_item_index += 1;
-
-
-            if (
-                sell_item_index >=
-                recipe_count
-            )
-            {
-                sell_item_index = 0;
-            }
-
-
-            sell_result =
-                "Choose a market.";
-        }
-
-
-        if (
-            keyboard_check_pressed(
-                vk_left
-            )
-            ||
-            keyboard_check_pressed(
-                vk_up
-            )
-        )
-        {
-            sell_item_index -= 1;
-
-
-            if (sell_item_index < 0)
-            {
-                sell_item_index =
-                    recipe_count - 1;
-            }
-
-
-            sell_result =
-                "Choose a market.";
-        }
-
-
-        // =================================================
-        // CURRENT ITEM
-        // =================================================
-
-        var sell_recipe =
-            global.recipes[
-                sell_item_index
-            ];
-
-
-        var item_key =
-            sell_recipe.id;
-
-
-        var item_amount =
-            0;
-
-
-        if (
-            variable_struct_exists(
-                global.item_inventory,
-                item_key
-            )
-        )
-        {
-            item_amount =
-                variable_struct_get(
-                    global.item_inventory,
-                    item_key
-                );
-        }
-
-
-        // =================================================
-        // SELL BUTTONS
-        // =================================================
-
-        if (
-            mouse_check_button_pressed(
-                mb_left
-            )
-        )
-        {
-            // =============================================
-            // FANTASY
-            // =============================================
-
-            if (
-                mouse_gui_x >=
-                    fantasy_button_x1
-                &&
-                mouse_gui_x <=
-                    fantasy_button_x2
-                &&
-                mouse_gui_y >=
-                    fantasy_button_y1
-                &&
-                mouse_gui_y <=
-                    fantasy_button_y2
-            )
-            {
-                if (item_amount > 0)
-                {
-                    var fantasy_sell_price =
-                        get_item_world_sell_price(
-                            sell_recipe,
-                            "FANTASY"
-                        );
-
-
-                    variable_struct_set(
-                        global.item_inventory,
-                        item_key,
-                        item_amount - 1
-                    );
-
-
-                    global.credits +=
-                        fantasy_sell_price;
-
-
-                    sell_result =
-                        "SOLD "
-                        +
-                        sell_recipe.name
-                        +
-                        " TO FANTASY: +"
-                        +
-                        string(
-                            fantasy_sell_price
-                        )
-                        +
-                        " cr";
-                }
-                else
-                {
-                    sell_result =
-                        "NO "
-                        +
-                        sell_recipe.name
-                        +
-                        " TO SELL";
-                }
-            }
-
-
-            // =============================================
-            // CYBERPUNK
-            // =============================================
-
-            else if (
-                mouse_gui_x >=
-                    cyber_button_x1
-                &&
-                mouse_gui_x <=
-                    cyber_button_x2
-                &&
-                mouse_gui_y >=
-                    cyber_button_y1
-                &&
-                mouse_gui_y <=
-                    cyber_button_y2
-            )
-            {
-                if (item_amount > 0)
-                {
-                    var cyber_sell_price =
-                        get_item_world_sell_price(
-                            sell_recipe,
-                            "CYBERPUNK"
-                        );
-
-
-                    variable_struct_set(
-                        global.item_inventory,
-                        item_key,
-                        item_amount - 1
-                    );
-
-
-                    global.credits +=
-                        cyber_sell_price;
-
-
-                    sell_result =
-                        "SOLD "
-                        +
-                        sell_recipe.name
-                        +
-                        " TO CYBERPUNK: +"
-                        +
-                        string(
-                            cyber_sell_price
-                        )
-                        +
-                        " cr";
-                }
-                else
-                {
-                    sell_result =
-                        "NO "
-                        +
-                        sell_recipe.name
-                        +
-                        " TO SELL";
-                }
-            }
-
-
-            // =============================================
-            // STEAMPUNK
-            // =============================================
-
-            else if (
-                mouse_gui_x >=
-                    steam_button_x1
-                &&
-                mouse_gui_x <=
-                    steam_button_x2
-                &&
-                mouse_gui_y >=
-                    steam_button_y1
-                &&
-                mouse_gui_y <=
-                    steam_button_y2
-            )
-            {
-                if (item_amount > 0)
-                {
-                    var steam_sell_price =
-                        get_item_world_sell_price(
-                            sell_recipe,
-                            "STEAMPUNK"
-                        );
-
-
-                    variable_struct_set(
-                        global.item_inventory,
-                        item_key,
-                        item_amount - 1
-                    );
-
-
-                    global.credits +=
-                        steam_sell_price;
-
-
-                    sell_result =
-                        "SOLD "
-                        +
-                        sell_recipe.name
-                        +
-                        " TO STEAMPUNK: +"
-                        +
-                        string(
-                            steam_sell_price
-                        )
-                        +
-                        " cr";
-                }
-                else
-                {
-                    sell_result =
-                        "NO "
-                        +
-                        sell_recipe.name
-                        +
-                        " TO SELL";
-                }
-            }
-        }
+        wheel = -1;
     }
+
+    if (mouse_wheel_down())
+    {
+        wheel = 1;
+    }
+
+    if (wheel != 0)
+    {
+        stack_scroll = clamp(
+            stack_scroll + wheel,
+            0,
+            max(0, array_length(stacks) - visible_stacks)
+        );
+    }
+}
+
+// =====================================================
+// CLICK
+// =====================================================
+
+if (!click)
+{
+    exit;
+}
+
+// =====================================================
+// PREVIOUS ITEM
+// =====================================================
+
+if (
+    mx >= panel_x + 20 &&
+    mx <= panel_x + 125 &&
+    my >= panel_y + 75 &&
+    my <= panel_y + 110
+)
+{
+    selected_item =
+        (selected_item + recipes_count - 1)
+        mod recipes_count;
+
+    selected_stack = 0;
+    stack_scroll = 0;
+
+    sell_message = "SELECT A QUALITY STACK";
+
+    exit;
+}
+
+// =====================================================
+// NEXT ITEM
+// =====================================================
+
+if (
+    mx >= panel_x + 425 &&
+    mx <= panel_x + 530 &&
+    my >= panel_y + 75 &&
+    my <= panel_y + 110
+)
+{
+    selected_item =
+        (selected_item + 1)
+        mod recipes_count;
+
+    selected_stack = 0;
+    stack_scroll = 0;
+
+    sell_message = "SELECT A QUALITY STACK";
+
+    exit;
+}
+
+// =====================================================
+// SELECT QUALITY STACK
+// =====================================================
+
+for (var row_i = 0; row_i < visible_stacks; row_i++)
+{
+    var stack_index = stack_scroll + row_i;
+
+    if (stack_index >= array_length(stacks))
+    {
+        break;
+    }
+
+    var row_y = panel_y + 130 + row_i * 31;
+
+    if (
+        mx >= panel_x + 20 &&
+        mx <= panel_x + 530 &&
+        my >= row_y &&
+        my <= row_y + 27
+    )
+    {
+        selected_stack = stack_index;
+        exit;
+    }
+}
+
+// =====================================================
+// SELL BUTTON
+// =====================================================
+
+if (
+    mx >= panel_x + 20 &&
+    mx <= panel_x + 530 &&
+    my >= panel_y + 300 &&
+    my <= panel_y + 340
+)
+{
+    sell_selected();
+    exit;
 }

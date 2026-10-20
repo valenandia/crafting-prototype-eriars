@@ -1,103 +1,119 @@
 /// obj_sell - Create Event
-
-
-// =====================================================
-// PANEL
-// =====================================================
-
-sell_x = 575;
-sell_y = 530;
-
-sell_panel_w = 450;
-sell_panel_h = 340;
-
-sell_result =
-    "Choose an item and market.";
-
+/// UNIFIED ITEM SELL SYSTEM V3.3
 
 // =====================================================
-// SELECTED ITEM
-// =====================================================
-//
-// Separate from global.selected_recipe.
-// Sell panel has its own selected item.
-//
-
-sell_item_index = 0;
-
-
-// =====================================================
-// BUTTON SIZE
+// PANEL SETTINGS
 // =====================================================
 
-sell_button_w = 100;
-sell_button_h = 36;
-
-
-// =====================================================
-// ITEM HEADER AREA
-// =====================================================
-//
-// Mouse wheel works while cursor is here.
-//
-
-sell_item_x1 =
-    sell_x + 20;
-
-sell_item_y1 =
-    sell_y + 52;
-
-sell_item_x2 =
-    sell_x + 430;
-
-sell_item_y2 =
-    sell_y + 100;
-
+panel_x = 1010;
+panel_y = 470;
+panel_w = 550;
+panel_h = 370;
 
 // =====================================================
-// BUTTONS
+// SELECTION
 // =====================================================
 
-fantasy_button_x1 =
-    sell_x + 310;
+selected_item = 0;
+selected_stack = 0;
 
-fantasy_button_y1 =
-    sell_y + 130;
+stack_scroll = 0;
+visible_stacks = 5;
 
-fantasy_button_x2 =
-    fantasy_button_x1 +
-    sell_button_w;
+// =====================================================
+// UI
+// =====================================================
 
-fantasy_button_y2 =
-    fantasy_button_y1 +
-    sell_button_h;
+sell_message = "SELECT AN ITEM AND QUALITY STACK";
 
+sell_result_timer = 0;
 
-cyber_button_x1 =
-    sell_x + 310;
+// =====================================================
+// DATA
+// =====================================================
 
-cyber_button_y1 =
-    sell_y + 190;
+recipes = craft_v3_recipes();
 
-cyber_button_x2 =
-    cyber_button_x1 +
-    sell_button_w;
+craft_v3_ensure_inventory();
 
-cyber_button_y2 =
-    cyber_button_y1 +
-    sell_button_h;
+if (!variable_global_exists("credits"))
+{
+    global.credits = 0;
+}
 
+// =====================================================
+// HELPERS
+// =====================================================
 
-steam_button_x1 =
-    sell_x + 310;
+get_selected_stacks = function()
+{
+    craft_v3_sync_inventory(selected_item);
 
-steam_button_y1 =
-    sell_y + 250;
+    return craft_v3_get_quality_stacks(selected_item);
+};
 
-steam_button_x2 =
-    steam_button_x1 +
-    sell_button_w;
+get_selected_owned = function()
+{
+    var item_id = recipes[selected_item].id;
 
-steam_button_y2 =
-    steam_button_y1 +
-    sell_button_h;
+    if (!variable_struct_exists(global.item_inventory, item_id))
+    {
+        return 0;
+    }
+
+    return variable_struct_get(global.item_inventory, item_id);
+};
+
+sell_selected = function()
+{
+    var stacks = get_selected_stacks();
+
+    if (array_length(stacks) <= 0)
+    {
+        sell_message = "NO ITEMS TO SELL";
+        return false;
+    }
+
+    selected_stack = clamp(
+        selected_stack,
+        0,
+        array_length(stacks) - 1
+    );
+
+    var quality = stacks[selected_stack].quality;
+
+    var earned = craft_v3_sell_item(
+        selected_item,
+        quality
+    );
+
+    if (earned <= 0)
+    {
+        sell_message = "SELL FAILED";
+        return false;
+    }
+
+    sell_message =
+        "SOLD " + recipes[selected_item].name +
+        " | Q" + string(quality) +
+        " | +" + string(earned) + " CR";
+
+    var remaining = get_selected_stacks();
+
+    if (selected_stack >= array_length(remaining))
+    {
+        selected_stack = max(
+            0,
+            array_length(remaining) - 1
+        );
+    }
+
+    if (stack_scroll > selected_stack)
+    {
+        stack_scroll = selected_stack;
+    }
+
+    sell_result_timer = room_speed * 3;
+
+    return true;
+};
