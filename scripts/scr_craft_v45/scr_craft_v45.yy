@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_craft_v45",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_craft_v45",
+  "parent":{
+    "name":"crafting-prototype-eriars",
+    "path":"crafting-prototype-eriars.yyp",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

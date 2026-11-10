@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_craft_v49_buffs",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_craft_v49_buffs",
+  "parent":{
+    "name":"crafting-prototype-eriars",
+    "path":"crafting-prototype-eriars.yyp",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

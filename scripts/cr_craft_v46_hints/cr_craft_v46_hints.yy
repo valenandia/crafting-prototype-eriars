@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"cr_craft_v46_hints",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"cr_craft_v46_hints",
+  "parent":{
+    "name":"crafting-prototype-eriars",
+    "path":"crafting-prototype-eriars.yyp",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

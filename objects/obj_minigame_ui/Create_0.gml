@@ -1,6 +1,6 @@
 
 /// obj_minigame_ui - CREATE
-/// CRAFTING V4.3
+/// CRAFTING V4.5
 
 recipes = craft_v3_recipes();
 groups = craft_v3_groups();
@@ -12,18 +12,18 @@ selected_category = -1;
 selected_group = 0;
 selected_variant = 1;
 selected_recipe = 0;
-selected_buff = 0;
 selected_preset = -1;
+selected_module = 1;
 
 book_open = true;
 ingredients_open = false;
 analyzer_open = true;
+module_guide_open = true;
 
-// -1 EMPTY, 0 C, 1 M, 2 Y
-upper_modules = array_create(6, -1);
-
-// -1 EMPTY, 0 FAIL, 1 BACK, 2 FIND
-buff_cells = array_create(9, -1);
+// Unified 3x3 grid:
+// 0 BASE, 1 C, 2 M, 3 Y,
+// 4 FAIL, 5 BACK, 6 FIND.
+module_cells = array_create(9, 0);
 
 vessel_stacks = [];
 vessel_capacity = 100;
@@ -42,6 +42,10 @@ drag_variant = 1;
 drag_start_x = 0;
 drag_start_y = 0;
 
+// All drawing and mouse interaction uses original
+// coordinates; the whole crafting UI is shifted up.
+ui_shift_y = -70;
+
 ui = {
     pool_x:24,
     pool_y:185,
@@ -55,7 +59,7 @@ ui = {
 
     upper_x:718,
     upper_y:268,
-    upper_cell:73,
+    upper_cell:62,
 
     analyzer_x:390,
     analyzer_y:480,
@@ -79,12 +83,10 @@ ui = {
 
     book_x:1000,
     book_y:290,
-    book_w:575,
-
-    buff_x:1035,
-    buff_y:705,
-    buff_cell:32
+    book_w:575
 };
+
+// GLOBALS
 
 if (!variable_global_exists("ui_screen"))
     global.ui_screen = 1;
@@ -180,16 +182,13 @@ add_to_vessel = function(_group, _variant, _amount)
 
     craft_result = 0;
     craft_note = "MATERIAL ADDED";
-
     return true;
 };
 
 remove_from_vessel = function(_group, _variant, _amount)
 {
     var idx = find_stack(_group, _variant);
-
-    if (idx < 0)
-        return false;
+    if (idx < 0) return false;
 
     vessel_stacks[idx].amount -= _amount;
 
@@ -198,7 +197,6 @@ remove_from_vessel = function(_group, _variant, _amount)
 
     craft_result = 0;
     craft_note = "MATERIAL REMOVED";
-
     return true;
 };
 
@@ -209,7 +207,7 @@ clear_vessel = function()
     craft_note = "VESSEL CLEARED";
 };
 
-// MODULES
+// UNIFIED MODULE SYSTEM
 
 load_category_shape = function(_category)
 {
@@ -217,13 +215,37 @@ load_category_shape = function(_category)
     || _category >= array_length(categories))
         return false;
 
-    upper_modules = craft_v4_category_pattern(_category);
+    module_cells = array_create(9, 0);
+
+    var pattern = craft_v4_category_pattern(_category);
+
+    // Choose which row stays available for
+    // Base modules or buffs.
+    var omit_row = irandom(2);
+    var src_row = 0;
+
+    for (var row = 0; row < 3; row++)
+    {
+        if (row == omit_row)
+            continue;
+
+        for (var col = 0; col < 3; col++)
+        {
+            var v = pattern[src_row * 3 + col];
+
+            module_cells[row * 3 + col] =
+                v < 0 ? 0 : v + 1;
+        }
+
+        src_row++;
+    }
 
     selected_category = _category;
     selected_preset = _category;
-
     craft_result = 0;
-    craft_note = categories[_category] + " SHAPE LOADED";
+
+    craft_note = categories[_category]
+        + " RANDOM SHAPE LOADED";
 
     return true;
 };
@@ -231,7 +253,7 @@ load_category_shape = function(_category)
 update_detected_category = function()
 {
     selected_category =
-        craft_v4_pattern_category(upper_modules);
+        craft_v45_pattern_category(module_cells);
 
     selected_preset = selected_category;
 };
@@ -240,18 +262,39 @@ update_detected_category = function()
 
 get_analysis = function()
 {
-    return craft_v4_analyze_modules(
-        upper_modules,
-        vessel_stacks
-    );
+    var category =
+        craft_v45_pattern_category(module_cells);
+
+    if (category < 0)
+    {
+        return {
+            status:"UNSTABLE",
+            recipe_index:-1,
+            capacity:craft_v4_total(vessel_stacks),
+            quality:0,
+            tier:"UNKNOWN",
+            completeness:0,
+            fidelity:0,
+            variants:0,
+            structure:0,
+            perfect:false,
+            is_discovered:false,
+            message:"INVALID MODULE COMBINATION"
+        };
+    }
+
+    return craft_v4_analyze(category, vessel_stacks);
 };
 
 get_current_recipe = function()
 {
-    return craft_v4_match_modules(
-        upper_modules,
-        vessel_stacks
-    );
+    var category =
+        craft_v45_pattern_category(module_cells);
+
+    if (category < 0)
+        return -1;
+
+    return craft_v4_match(category, vessel_stacks);
 };
 
 get_quality = function()
@@ -271,7 +314,15 @@ get_quality = function()
 
 get_buff_shape = function()
 {
-    return craft_v3_buff_shape(buff_cells);
+    var mask = array_create(9, -1);
+
+    for (var i = 0; i < 9; i++)
+    {
+        if (module_cells[i] >= 4)
+            mask[i] = module_cells[i] - 4;
+    }
+
+    return craft_v3_buff_shape(mask);
 };
 
 get_buff_rate = function(_type)
@@ -280,7 +331,7 @@ get_buff_rate = function(_type)
 
     for (var i = 0; i < 9; i++)
     {
-        if (buff_cells[i] == _type)
+        if (module_cells[i] == _type + 4)
             count++;
     }
 
@@ -329,7 +380,7 @@ get_failure = function()
     return clamp(failure, 0, 100);
 };
 
-// LOAD RECIPE
+// LOAD DISCOVERED RECIPE
 
 load_recipe = function(_ri, _perfect)
 {
@@ -357,11 +408,9 @@ load_recipe = function(_ri, _perfect)
     {
         var recipe = recipes[_ri];
 
-        for (
-            var i = 0;
-            i < array_length(recipe.ingredients);
-            i++
-        )
+        for (var i = 0;
+             i < array_length(recipe.ingredients);
+             i++)
         {
             var ing = recipe.ingredients[i];
 
@@ -382,7 +431,7 @@ load_recipe = function(_ri, _perfect)
     return true;
 };
 
-// TRUE RANDOM
+// TRUE RANDOM MATERIAL MIX
 
 randomize_craft = function()
 {
@@ -393,7 +442,7 @@ randomize_craft = function()
     for (var i = 0; i < array_length(groups); i++)
         array_push(order, i);
 
-    for (var i = array_length(order)-1; i > 0; i--)
+    for (var i = array_length(order) - 1; i > 0; i--)
     {
         var j = irandom(i);
         var temp = order[i];
@@ -432,11 +481,8 @@ randomize_craft = function()
         for (var v = 1; v <= variant_counts[gi]; v++)
             array_push(available_variants, v);
 
-        for (
-            var v = array_length(available_variants)-1;
-            v > 0;
-            v--
-        )
+        for (var v = array_length(available_variants) - 1;
+             v > 0; v--)
         {
             var j = irandom(v);
             var temp = available_variants[v];
@@ -492,15 +538,12 @@ craft_current = function()
     }
 
     var required = array_create(
-        array_length(groups),
-        0
+        array_length(groups), 0
     );
 
-    for (
-        var i = 0;
-        i < array_length(vessel_stacks);
-        i++
-    )
+    for (var i = 0;
+         i < array_length(vessel_stacks);
+         i++)
     {
         var stack = vessel_stacks[i];
         var gi = craft_v3_group_index(stack.group);
@@ -569,6 +612,7 @@ craft_current = function()
     }
 
     // BACK BUFF
+
     if (random(100) < get_buff_rate(1))
     {
         var available = [];
@@ -582,7 +626,7 @@ craft_current = function()
         if (array_length(available) > 0)
         {
             var gi = available[
-                irandom(array_length(available)-1)
+                irandom(array_length(available) - 1)
             ];
 
             var refund = min(10, required[gi]);
@@ -595,6 +639,7 @@ craft_current = function()
     }
 
     // FIND BUFF
+
     if (random(100) < get_buff_rate(2))
     {
         var unknown = [];
@@ -608,7 +653,7 @@ craft_current = function()
         if (array_length(unknown) > 0)
         {
             var found = unknown[
-                irandom(array_length(unknown)-1)
+                irandom(array_length(unknown) - 1)
             ];
 
             craft_v3_discover(found);
@@ -620,6 +665,72 @@ craft_current = function()
     return success;
 };
 
-// Move all crafting panels upward by 70 pixels.
 
-ui_shift_y = -70;
+/// ==========================================
+/// CRAFTING V4.8 - RANDOM PRESETS V2
+/// Add at the very END of Create Event
+/// ==========================================
+
+random_preset_buffs = false;
+
+load_category_shape = function(_category)
+{
+    if (_category < 0
+    || _category >= array_length(categories))
+        return false;
+
+    var generated = craft_v48_generate(
+        module_cells,
+        _category,
+        random_preset_buffs
+    );
+
+    if (!generated.success)
+    {
+        craft_note = "PRESET GENERATION FAILED";
+        return false;
+    }
+
+    module_cells = generated.cells;
+
+    selected_category = _category;
+    selected_preset = _category;
+
+    craft_result = 0;
+
+    craft_note =
+        categories[_category]
+        + " / PRESERVED "
+        + string(generated.preserved)
+        + " / MOVED "
+        + string(generated.moved)
+        + " / DROPPED "
+        + string(generated.dropped);
+
+    return true;
+};
+
+
+/// ==========================================
+/// CRAFTING V4.9 - BUFF BALANCING
+/// Add to the END of Create Event
+/// ==========================================            
+
+// Unified buff rate calculation.
+// Multiple modules of one type do not stack.
+
+get_buff_rate = function(_type)
+{
+    return craft_v49_buff_rate(
+        module_cells,
+        _type
+    );
+};
+
+// Full buff diagnostics.
+
+get_buff_report = function()
+{
+    return craft_v49_buff_report(module_cells);
+};
+ 
